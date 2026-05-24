@@ -63,6 +63,7 @@ add_check() {
   CHECK_MESSAGE+=("${message}")
   [[ "${status}" == 'fail' ]] && FAILED_CHECKS=$((FAILED_CHECKS + 1))
   [[ "${status}" == 'warn' ]] && WARN_CHECKS=$((WARN_CHECKS + 1))
+  return 0
 }
 
 run_check() {
