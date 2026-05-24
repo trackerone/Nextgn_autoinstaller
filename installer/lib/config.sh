@@ -44,13 +44,36 @@ parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --domain) require_value "$1" "${2:-}"; DOMAIN="$2"; shift 2 ;;
-      --install-dir|--app-dir) require_value "$1" "${2:-}"; INSTALL_DIR="$2"; shift 2 ;;
+      --install-dir|--app-dir)
+        require_value "$1" "${2:-}"
+        # shellcheck disable=SC2034
+        INSTALL_DIR="$2"
+        shift 2
+        ;;
       --repo) require_value "$1" "${2:-}"; REPO_URL="$2"; shift 2 ;;
-      --branch) require_value "$1" "${2:-}"; REPO_BRANCH="$2"; shift 2 ;;
-      --license-key) require_value "$1" "${2:-}"; LICENSE_KEY="$2"; shift 2 ;;
+      --branch)
+        require_value "$1" "${2:-}"
+        # shellcheck disable=SC2034
+        REPO_BRANCH="$2"
+        shift 2
+        ;;
+      --license-key)
+        require_value "$1" "${2:-}"
+        # shellcheck disable=SC2034
+        LICENSE_KEY="$2"
+        shift 2
+        ;;
       --enable-tls) ENABLE_TLS='true'; shift ;;
-      --force) FORCE='true'; shift ;;
-      --dry-run) DRY_RUN='true'; shift ;;
+      --force)
+        # shellcheck disable=SC2034
+        FORCE='true'
+        shift
+        ;;
+      --dry-run)
+        # shellcheck disable=SC2034
+        DRY_RUN='true'
+        shift
+        ;;
       --help) show_help; exit 0 ;;
       *) print_error "Unknown argument: $1"; show_help; exit 1 ;;
     esac
