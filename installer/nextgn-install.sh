@@ -35,7 +35,7 @@ source "${SCRIPT_DIR}/lib/telemetry.sh"
 
 main() {
   setup_error_trap
-  trap 'print_recovery_guidance; release_install_lock' EXIT
+  trap 'on_exit' EXIT
   parse_args "$@"
 
   local installer_version
