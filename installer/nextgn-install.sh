@@ -2,20 +2,33 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-cd "${REPO_ROOT}"
+cd "${REPO_ROOT}" || exit 1
 
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/output.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/logging.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/strict.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/runner.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/config.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/checks.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/license.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/templates.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/tls.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/verify.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/admin.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/summary.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/version.sh"
 
 main() {

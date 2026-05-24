@@ -12,6 +12,7 @@ check_os_version() {
   local os_id='' version_id=''
 
   if [[ -r /etc/os-release ]]; then
+    # shellcheck source=/dev/null
     . /etc/os-release
     os_id="${ID:-}"
     version_id="${VERSION_ID:-}"
