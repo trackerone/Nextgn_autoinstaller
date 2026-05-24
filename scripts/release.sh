@@ -17,7 +17,7 @@ mkdir -p "${OUT_DIR}"
 rm -rf "${RELEASE_DIR}"
 mkdir -p "${RELEASE_DIR}"
 
-cp -a installer docs README.md VERSION "${RELEASE_DIR}/"
+cp -a installer docs scripts tests README.md VERSION "${RELEASE_DIR}/"
 if [[ -f LICENSE ]]; then cp -a LICENSE "${RELEASE_DIR}/"; fi
 
 git_commit="$(git rev-parse --short=12 HEAD)"

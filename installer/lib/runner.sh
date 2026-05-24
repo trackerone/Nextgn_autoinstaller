@@ -97,7 +97,9 @@ run_step() {
     return 0
   fi
   "$@"
-  [[ "${DRY_RUN}" == 'false' ]] && mark_step_done "${step}"
+  if [[ "${DRY_RUN}" == 'false' ]]; then
+    mark_step_done "${step}"
+  fi
 }
 
 bootstrap_app() {
