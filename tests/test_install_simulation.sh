@@ -110,7 +110,10 @@ printf '%s\n' 'very-strong-password' > "${TMP_DIR}/admin.pass"
 NEXTGN_CREATE_ADMIN=true NEXTGN_ADMIN_NAME='Site Owner' NEXTGN_ADMIN_EMAIL='admin@example.com' NEXTGN_ADMIN_PASSWORD_FILE="${TMP_DIR}/admin.pass" bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/repo.git --dry-run >"${TMP_DIR}/dryrun-admin.out" 2>&1
 grep -q 'admin bootstrap enabled; would run first sysop creation command' "${TMP_DIR}/dryrun-admin.out"
 grep -q 'target admin email: admin@example.com' "${TMP_DIR}/dryrun-admin.out"
-! grep -q 'very-strong-password' "${TMP_DIR}/dryrun-admin.out"
+if grep -q 'very-strong-password' "${TMP_DIR}/dryrun-admin.out"; then
+  echo "Admin password leaked in dry-run output" >&2
+  exit 1
+fi
 
 CURRENT_STEP='dry-run invalid admin email'
 echo "[SIM] ${CURRENT_STEP}"
@@ -131,7 +134,10 @@ CURRENT_STEP='dry-run password-file preferred over inline'
 echo "[SIM] ${CURRENT_STEP}"
 NEXTGN_CREATE_ADMIN=true NEXTGN_ADMIN_NAME='Site Owner' NEXTGN_ADMIN_EMAIL='admin@example.com' NEXTGN_ADMIN_PASSWORD='inline-password-value' NEXTGN_ADMIN_PASSWORD_FILE="${TMP_DIR}/admin.pass" bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/repo.git --dry-run >"${TMP_DIR}/dryrun-pass-preferred.out" 2>&1
 grep -q 'using password file' "${TMP_DIR}/dryrun-pass-preferred.out"
-! grep -q 'inline-password-value' "${TMP_DIR}/dryrun-pass-preferred.out"
+if grep -q 'inline-password-value' "${TMP_DIR}/dryrun-pass-preferred.out"; then
+  echo "Inline admin password leaked despite password-file preference" >&2
+  exit 1
+fi
 
 # limited real execution writes templates + state and supports resume
 CURRENT_STEP='real execution force run'

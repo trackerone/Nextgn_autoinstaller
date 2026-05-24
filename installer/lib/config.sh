@@ -97,11 +97,35 @@ parse_args() {
         INSTALL_DOCKER='true'
         shift
         ;;
-      --create-admin) CREATE_ADMIN='true'; shift ;;
-      --admin-name) require_value "$1" "${2:-}"; ADMIN_NAME="$2"; shift 2 ;;
-      --admin-email) require_value "$1" "${2:-}"; ADMIN_EMAIL="$2"; shift 2 ;;
-      --admin-password) require_value "$1" "${2:-}"; ADMIN_PASSWORD="$2"; shift 2 ;;
-      --admin-password-file) require_value "$1" "${2:-}"; ADMIN_PASSWORD_FILE="$2"; shift 2 ;;
+      --create-admin)
+        # shellcheck disable=SC2034
+        CREATE_ADMIN='true'
+        shift
+        ;;
+      --admin-name)
+        require_value "$1" "${2:-}"
+        # shellcheck disable=SC2034
+        ADMIN_NAME="$2"
+        shift 2
+        ;;
+      --admin-email)
+        require_value "$1" "${2:-}"
+        # shellcheck disable=SC2034
+        ADMIN_EMAIL="$2"
+        shift 2
+        ;;
+      --admin-password)
+        require_value "$1" "${2:-}"
+        # shellcheck disable=SC2034
+        ADMIN_PASSWORD="$2"
+        shift 2
+        ;;
+      --admin-password-file)
+        require_value "$1" "${2:-}"
+        # shellcheck disable=SC2034
+        ADMIN_PASSWORD_FILE="$2"
+        shift 2
+        ;;
       --force)
         # shellcheck disable=SC2034
         FORCE='true'
