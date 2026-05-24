@@ -2,11 +2,16 @@
 set -Eeuo pipefail
 IFS=$'\n\t'
 
-check_os_version() { :; }
 check_os_version() {
-  local os_id version_id
-  os_id="$(. /etc/os-release && printf '%s' "${ID}")"
-  version_id="$(. /etc/os-release && printf '%s' "${VERSION_ID}")"
+  local os_id='' version_id=''
+
+  # shellcheck source=/etc/os-release
+  if [[ -r /etc/os-release ]]; then
+    . /etc/os-release
+    os_id="${ID:-}"
+    version_id="${VERSION_ID:-}"
+  fi
+
   if [[ "${os_id}" != 'ubuntu' ]] || [[ "${version_id}" != '22.04' && "${version_id}" != '24.04' ]]; then
     print_error "Unsupported OS: ${os_id} ${version_id}. Expected Ubuntu 22.04 or 24.04."
     exit 1
@@ -67,5 +72,9 @@ check_ports() {
       blocked='true'
     fi
   done
-  [[ "${blocked}" == 'true' ]] && print_warn 'Port checks found potential conflicts.' || print_success 'Port checks passed.'
+  if [[ "${blocked}" == 'true' ]]; then
+    print_warn 'Port checks found potential conflicts.'
+  else
+    print_success 'Port checks passed.'
+  fi
 }
