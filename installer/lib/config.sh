@@ -13,6 +13,7 @@ REPO_URL=''
 REPO_BRANCH='main'
 LICENSE_KEY=''
 ENABLE_TLS='false'
+SHOW_VERSION='false'
 
 show_help() {
   cat <<'HELP'
@@ -27,6 +28,7 @@ Options:
   --enable-tls
   --force
   --dry-run
+  --version
   --help
 HELP
 }
@@ -74,10 +76,15 @@ parse_args() {
         DRY_RUN='true'
         shift
         ;;
+      --version) SHOW_VERSION='true'; shift ;;
       --help) show_help; exit 0 ;;
       *) print_error "Unknown argument: $1"; show_help; exit 1 ;;
     esac
   done
+
+  if [[ "${SHOW_VERSION}" == 'true' ]]; then
+    return 0
+  fi
 
   [[ -n "${DOMAIN}" ]] || { print_error '--domain is required.'; exit 1; }
   [[ -n "${REPO_URL}" ]] || { print_error '--repo is required.'; exit 1; }

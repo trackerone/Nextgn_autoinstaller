@@ -4,7 +4,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 print_install_summary() {
-  local domain="$1" install_dir="$2" tls_enabled="$3"
+  local domain="$1" install_dir="$2" tls_enabled="$3" version="$4"
   local app_url="http://${domain}"
 
   if [[ "${tls_enabled}" == 'true' ]]; then
@@ -13,6 +13,7 @@ print_install_summary() {
 
   echo
   print_info 'Install summary:'
+  printf '  Installer version: %s\n' "${version}"
   printf '  Domain: %s\n' "${domain}"
   printf '  Install path: %s\n' "${install_dir}"
   printf '  App URL: %s\n' "${app_url}"

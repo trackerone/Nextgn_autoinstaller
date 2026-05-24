@@ -7,7 +7,7 @@ source "${ROOT_DIR}/installer/lib/output.sh"
 source "${ROOT_DIR}/installer/lib/config.sh"
 
 reset_defaults() {
-  DRY_RUN='false'; FORCE='false'; DOMAIN=''; INSTALL_DIR='/opt/nextgn-tracker'; REPO_URL=''; REPO_BRANCH='main'; LICENSE_KEY=''
+  DRY_RUN='false'; FORCE='false'; DOMAIN=''; INSTALL_DIR='/opt/nextgn-tracker'; REPO_URL=''; REPO_BRANCH='main'; LICENSE_KEY=''; ENABLE_TLS='false'; SHOW_VERSION='false'
 }
 
 assert_eq() { [[ "$1" == "$2" ]] || { echo "assertion failed: expected '$2', got '$1'"; exit 1; }; }
@@ -28,3 +28,8 @@ help_output="$( (parse_args --help) 2>&1 || true )"
 [[ "$help_output" == *'Usage: nextgn-install.sh'* ]] || { echo 'help output missing usage'; exit 1; }
 
 echo 'Argument parsing tests passed.'
+
+reset_defaults
+parse_args --version
+assert_eq "$SHOW_VERSION" 'true'
+
