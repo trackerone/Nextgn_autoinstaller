@@ -13,6 +13,7 @@ REPO_URL=''
 REPO_BRANCH='main'
 LICENSE_KEY=''
 ENABLE_TLS="${NEXTGN_ENABLE_TLS:-false}"
+INSTALL_DOCKER="${NEXTGN_INSTALL_DOCKER:-false}"
 SHOW_VERSION='false'
 # shellcheck disable=SC2034
 UNATTENDED="${NEXTGN_UNATTENDED:-false}"
@@ -28,6 +29,7 @@ Options:
   --install-dir <path>
   --license-key <key>
   --enable-tls
+  --install-docker
   --force
   --dry-run
   --version
@@ -37,6 +39,7 @@ Environment overrides:
   NEXTGN_DOMAIN
   NEXTGN_INSTALL_DIR
   NEXTGN_ENABLE_TLS
+  NEXTGN_INSTALL_DOCKER
   NEXTGN_UNATTENDED
 HELP
 }
@@ -74,6 +77,7 @@ parse_args() {
         shift 2
         ;;
       --enable-tls) ENABLE_TLS='true'; shift ;;
+      --install-docker) INSTALL_DOCKER='true'; shift ;;
       --force)
         # shellcheck disable=SC2034
         FORCE='true'

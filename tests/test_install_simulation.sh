@@ -147,6 +147,15 @@ CURRENT_STEP='missing docker failure simulation'
 echo "[SIM] ${CURRENT_STEP}"
 NEXTGN_TEST_DOCKER_MISSING=true bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/repo.git --dry-run >"${TMP_DIR}/missing-docker.out" 2>&1 || true
 grep -q 'Docker is not installed.' "${TMP_DIR}/missing-docker.out"
+grep -q 'Rerun with --install-docker or set NEXTGN_INSTALL_DOCKER=true.' "${TMP_DIR}/missing-docker.out"
+
+CURRENT_STEP='missing docker dry-run provisioning simulation'
+echo "[SIM] ${CURRENT_STEP}"
+NEXTGN_TEST_DOCKER_MISSING=true NEXTGN_INSTALL_DOCKER=true bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/repo.git --dry-run >"${TMP_DIR}/missing-docker-provision.out" 2>&1
+grep -q 'Docker is not installed.' "${TMP_DIR}/missing-docker-provision.out"
+grep -q 'Docker provisioning enabled' "${TMP_DIR}/missing-docker-provision.out"
+grep -Eqi 'apt-get install|docker-ce' "${TMP_DIR}/missing-docker-provision.out"
+grep -q 'DRY-RUN' "${TMP_DIR}/missing-docker-provision.out"
 
 CURRENT_STEP='unwritable install dir simulation'
 echo "[SIM] ${CURRENT_STEP}"

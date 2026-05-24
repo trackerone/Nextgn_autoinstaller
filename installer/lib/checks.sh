@@ -46,27 +46,58 @@ check_disk_ram() {
 
 check_docker() {
   local docker_ver compose_ver
-  # Test-only hook for deterministic CI failure-path simulation.
-  if [[ "${NEXTGN_TEST_DOCKER_MISSING:-false}" == "true" ]]; then
-    print_error "Docker is not installed."
-    return 1
+
+  if should_install_docker; then
+    print_info 'Docker provisioning enabled.'
   fi
 
-  command -v docker >/dev/null 2>&1 || {
+  if [[ "${NEXTGN_TEST_DOCKER_MISSING:-false}" == 'true' ]]; then
     print_error 'Docker is not installed.'
-    print_warn 'Action: install Docker Engine and Docker Compose plugin, then rerun installer.'
-    exit 1
-  }
-  docker info >/dev/null 2>&1 || {
+    if should_install_docker; then
+      print_info 'Docker provisioning enabled.'
+      install_docker_packages || { print_error 'Docker provisioning failed.'; exit 1; }
+      ensure_docker_service || { print_error 'Docker service remediation failed.'; exit 1; }
+      if [[ "${DRY_RUN}" == 'true' ]]; then
+        run_cmd "${DRY_RUN}" docker info
+        run_cmd "${DRY_RUN}" docker compose version
+      fi
+      print_success 'Docker daemon and Docker Compose plugin checks passed.'
+      return 0
+    else
+      print_warn 'Action: Rerun with --install-docker or set NEXTGN_INSTALL_DOCKER=true.'
+      exit 1
+    fi
+  fi
+
+  if ! docker_is_installed; then
+    print_error 'Docker is not installed.'
+    if should_install_docker; then
+      provision_docker_if_requested || { print_error 'Docker provisioning failed.'; exit 1; }
+    else
+      print_warn 'Action: Rerun with --install-docker or set NEXTGN_INSTALL_DOCKER=true.'
+      exit 1
+    fi
+  fi
+
+  if ! docker_daemon_running; then
     print_error 'Docker daemon is not running.'
-    print_warn 'Action: start Docker daemon (e.g. systemctl start docker) and rerun installer.'
-    exit 1
-  }
-  docker compose version >/dev/null 2>&1 || {
+    if should_install_docker; then
+      provision_docker_if_requested || { print_error 'Docker daemon remediation failed.'; exit 1; }
+    else
+      print_warn 'Action: start Docker daemon (e.g. systemctl start docker), or rerun with --install-docker or NEXTGN_INSTALL_DOCKER=true.'
+      exit 1
+    fi
+  fi
+
+  if ! docker_compose_available; then
     print_error 'Docker Compose plugin is required and must be working.'
-    print_warn 'Action: install/repair Docker Compose plugin and rerun installer.'
-    exit 1
-  }
+    if should_install_docker; then
+      provision_docker_if_requested || { print_error 'Docker Compose remediation failed.'; exit 1; }
+    else
+      print_warn 'Action: install/repair Docker Compose plugin, or rerun with --install-docker or NEXTGN_INSTALL_DOCKER=true.'
+      exit 1
+    fi
+  fi
 
   docker_ver="$(docker version --format '{{.Server.Version}}' 2>/dev/null || true)"
   compose_ver="$(docker compose version --short 2>/dev/null || true)"

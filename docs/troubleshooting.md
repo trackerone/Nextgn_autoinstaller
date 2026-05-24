@@ -4,7 +4,19 @@
 If installer exits with unsupported OS, verify `/etc/os-release` reports Ubuntu 22.04 or 24.04.
 
 ## Missing Docker
-Install Docker Engine and Docker Compose plugin, then re-run installer.
+If Docker is missing or unhealthy, rerun with:
+
+```bash
+./installer/nextgn-install.sh --domain example.com --repo <repo-url> --install-docker
+```
+
+Or set:
+
+```bash
+NEXTGN_INSTALL_DOCKER=true
+```
+
+Installer does not install Docker unless explicitly requested.
 
 ## Port Conflicts
 If ports 80/443 are busy, stop conflicting services or adjust reverse proxy architecture before deployment.

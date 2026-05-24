@@ -15,6 +15,8 @@ source "${SCRIPT_DIR}/lib/runner.sh"
 # shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/config.sh"
 # shellcheck source=/dev/null
+source "${SCRIPT_DIR}/lib/docker.sh"
+# shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/checks.sh"
 # shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/license.sh"
