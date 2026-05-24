@@ -29,9 +29,12 @@ verify_installation() {
 
 verify_container_state() {
   local install_dir="$1" service="$2"
-  local state
+  local state compose_output
 
-  state="$(cd "${install_dir}" && docker compose -f deploy/docker-compose.prod.yml ps --format json "${service}" 2>/dev/null | rg -o '"State":"[^"]+"' | head -n1 | cut -d':' -f2 | tr -d '"' || true)"
+  state=''
+  if compose_output="$(cd "${install_dir}" && docker compose -f deploy/docker-compose.prod.yml ps --format json "${service}" 2>/dev/null)"; then
+    state="$(printf '%s\n' "${compose_output}" | rg -o '"State":"[^"]+"' | head -n1 | cut -d':' -f2 | tr -d '"')"
+  fi
   if [[ "${state}" != 'running' && "${state}" != 'healthy' ]]; then
     VERIFY_WARNINGS+=("Service ${service} is not healthy/running.")
     print_warn "Verification warning: ${service} state='${state:-unknown}'."
