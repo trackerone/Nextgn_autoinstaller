@@ -43,7 +43,7 @@ is_service_healthy() {
   local install_dir="$1" service="$2" state compose_output
   state=''
   if compose_output="$(cd "${install_dir}" && docker compose -f deploy/docker-compose.prod.yml ps --format json "${service}" 2>/dev/null)"; then
-    state="$(printf '%s\n' "${compose_output}" | rg -o '"State":"[^"]+"' | head -n1 | cut -d':' -f2 | tr -d '"')"
+    state="$(printf '%s\n' "${compose_output}" | sed -n 's/.*"State":"\([^"]*\)".*/\1/p' | head -n1)"
   fi
   [[ "${state}" == 'running' || "${state}" == 'healthy' ]]
 }

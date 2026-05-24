@@ -46,9 +46,21 @@ check_disk_ram() {
 
 check_docker() {
   local docker_ver compose_ver
-  command -v docker >/dev/null 2>&1 || { print_error 'Docker is not installed.'; exit 1; }
-  docker info >/dev/null 2>&1 || { print_error 'Docker daemon is not running.'; exit 1; }
-  docker compose version >/dev/null 2>&1 || { print_error 'Docker Compose plugin is required and must be working.'; exit 1; }
+  command -v docker >/dev/null 2>&1 || {
+    print_error 'Docker is not installed.'
+    print_warn 'Action: install Docker Engine and Docker Compose plugin, then rerun installer.'
+    exit 1
+  }
+  docker info >/dev/null 2>&1 || {
+    print_error 'Docker daemon is not running.'
+    print_warn 'Action: start Docker daemon (e.g. systemctl start docker) and rerun installer.'
+    exit 1
+  }
+  docker compose version >/dev/null 2>&1 || {
+    print_error 'Docker Compose plugin is required and must be working.'
+    print_warn 'Action: install/repair Docker Compose plugin and rerun installer.'
+    exit 1
+  }
 
   docker_ver="$(docker version --format '{{.Server.Version}}' 2>/dev/null || true)"
   compose_ver="$(docker compose version --short 2>/dev/null || true)"

@@ -10,6 +10,15 @@ LOCK_FD=201
 CURRENT_PHASE='startup'
 : "${LOG_FILE:=/var/log/nextgn-installer.log}"
 
+on_exit() {
+  local exit_code="$?"
+  if (( exit_code != 0 )); then
+    print_recovery_guidance
+  fi
+  release_install_lock
+  return "${exit_code}"
+}
+
 run_cmd() {
   local dry_run="$1"
   shift
