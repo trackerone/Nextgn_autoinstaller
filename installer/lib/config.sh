@@ -3,6 +3,8 @@
 set -Eeuo pipefail
 IFS=$'\n\t'
 
+# Shared installer state variables consumed across sourced modules (runner/checks/verify/main script).
+# shellcheck disable=SC2034
 DRY_RUN='false'
 FORCE='false'
 DOMAIN=''

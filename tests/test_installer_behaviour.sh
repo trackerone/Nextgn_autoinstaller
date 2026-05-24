@@ -32,7 +32,10 @@ echo 'step_one' >>"${STATE_FILE}"
 init_state 'false' 'false'
 rg -q '^step_one$' "${STATE_FILE}"
 init_state 'true' 'false'
-! rg -q '^step_one$' "${STATE_FILE}"
+if rg -q '^step_one$' "${STATE_FILE}"; then
+  echo 'Expected force init_state to clear previous state.' >&2
+  exit 1
+fi
 
 # dry-run does not mutate files
 test_file="${tmp_dir}/dry-run.txt"

@@ -50,6 +50,8 @@ mark_step_done() {
 }
 
 run_step() {
+  : "${DRY_RUN:=false}"
+
   local step="$1"
   shift
   if [[ "${DRY_RUN}" == 'false' ]] && is_step_done "${step}"; then
