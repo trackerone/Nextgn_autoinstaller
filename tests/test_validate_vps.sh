@@ -5,6 +5,35 @@ IFS=$'\n\t'
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
+CURRENT_STEP='initializing'
+
+redact_sensitive() {
+  sed -E \
+    -e 's/([Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Tt][Oo][Kk][Ee][Nn]|[Ll][Ii][Cc][Ee][Nn][Ss][Ee]|[Aa][Pp][Pp]_[Kk][Ee][Yy]|[Kk][Ee][Yy])=([^[:space:]]+)/\1=<redacted>/g' \
+    -e 's/("([Pp]assword|[Tt]oken|[Ll]icense|[Kk]ey)"[[:space:]]*:[[:space:]]*")[^"]+/\1<redacted>/g'
+}
+
+dump_diagnostics() {
+  echo '--- VPS test diagnostics ---' >&2
+  echo "TMP_DIR=${TMP_DIR}" >&2
+  echo "OUT_DIR=${TMP_DIR}/out" >&2
+  echo "OUT2_DIR=${TMP_DIR}/out2" >&2
+  for artifact in \
+    "${TMP_DIR}/out/validation-report.txt" \
+    "${TMP_DIR}/out/validation-report.json" \
+    "${TMP_DIR}/out/stdout.log" \
+    "${TMP_DIR}/out/stderr.log" \
+    "${TMP_DIR}/out2/validation-report.txt" \
+    "${TMP_DIR}/out2/validation-report.json" \
+    "${TMP_DIR}/out2/stdout.log" \
+    "${TMP_DIR}/out2/stderr.log"; do
+    if [[ -f "${artifact}" ]]; then
+      echo "--- ${artifact} ---" >&2
+      redact_sensitive <"${artifact}" >&2
+    fi
+  done
+}
+trap 'echo "ERROR: step ${CURRENT_STEP} failed at line ${LINENO}: ${BASH_COMMAND}" >&2; dump_diagnostics; exit 1' ERR
 
 mkdir -p "${TMP_DIR}/bin" "${TMP_DIR}/install/deploy" "${TMP_DIR}/out"
 cat > "${TMP_DIR}/install/.env" <<'ENV'
@@ -52,15 +81,21 @@ chmod +x "${TMP_DIR}/bin/"*
 
 export PATH="${TMP_DIR}/bin:/usr/bin:/bin"
 
+CURRENT_STEP='help output'
+echo '[VPS-TEST] help output'
 help_out="$(bash "${ROOT_DIR}/scripts/validate-vps-install.sh" --help)"
 [[ "${help_out}" == *'Usage: validate-vps-install.sh'* ]]
 
+CURRENT_STEP='missing required args'
+echo '[VPS-TEST] missing required args'
 if bash "${ROOT_DIR}/scripts/validate-vps-install.sh" --domain tracker.example.com >/dev/null 2>&1; then
   echo 'expected missing --install-dir to fail' >&2
   exit 1
 fi
 
-bash "${ROOT_DIR}/scripts/validate-vps-install.sh" --domain tracker.example.com --install-dir "${TMP_DIR}/install" --output-dir "${TMP_DIR}/out" || true
+CURRENT_STEP='report generation'
+echo '[VPS-TEST] report generation'
+bash "${ROOT_DIR}/scripts/validate-vps-install.sh" --domain tracker.example.com --install-dir "${TMP_DIR}/install" --output-dir "${TMP_DIR}/out" >"${TMP_DIR}/out/stdout.log" 2>"${TMP_DIR}/out/stderr.log"
 [[ -f "${TMP_DIR}/out/validation-report.json" ]]
 [[ -f "${TMP_DIR}/out/validation-report.txt" ]]
 grep -Eq '"final_status": "(pass|warn|fail)"' "${TMP_DIR}/out/validation-report.json"
@@ -73,8 +108,11 @@ if grep -q 'super-secret' "${TMP_DIR}/out/validation-report.json"; then
   exit 1
 fi
 
+CURRENT_STEP='missing compose file failure'
+echo '[VPS-TEST] missing compose file failure'
 rm -f "${TMP_DIR}/install/deploy/docker-compose.prod.yml"
-if bash "${ROOT_DIR}/scripts/validate-vps-install.sh" --domain tracker.example.com --install-dir "${TMP_DIR}/install" --output-dir "${TMP_DIR}/out2" --json-only; then
+mkdir -p "${TMP_DIR}/out2"
+if bash "${ROOT_DIR}/scripts/validate-vps-install.sh" --domain tracker.example.com --install-dir "${TMP_DIR}/install" --output-dir "${TMP_DIR}/out2" --json-only >"${TMP_DIR}/out2/stdout.log" 2>"${TMP_DIR}/out2/stderr.log"; then
   echo 'expected missing compose file to fail' >&2
   exit 1
 fi
