@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Release engineering and distribution packaging pipeline.
 - Installer version reporting, banner, and release validation tooling.
+- Slice 10 release-readiness runner that executes self-test, shell tests, release build, and artifact verification.
 
 ## [0.1.0] - 2026-05-24
 
