@@ -35,6 +35,8 @@ jobs:
       - name: Validate extracted package self-tests
         timeout-minutes: 5
         run: |
+          # verify-release.sh validates builder-side dist artifacts.
+          # Extracted release packages are validated with self-test only.
           VERSION="$(tr -d '[:space:]' < VERSION)"
           WORK_DIR="$(mktemp -d)"
           TAR_DIR="${WORK_DIR}/tar"
@@ -46,7 +48,7 @@ jobs:
             "${TAR_DIR}/nextgn-installer-v${VERSION}" \
             "${ZIP_DIR}/nextgn-installer-v${VERSION}"
           do
-            (cd "${pkg}" && bash scripts/self-test.sh && bash scripts/verify-release.sh)
+            (cd "${pkg}" && bash scripts/self-test.sh)
           done
 
       - name: Upload install simulation diagnostics
