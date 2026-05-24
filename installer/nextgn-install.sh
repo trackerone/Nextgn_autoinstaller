@@ -30,6 +30,8 @@ source "${SCRIPT_DIR}/lib/admin.sh"
 source "${SCRIPT_DIR}/lib/summary.sh"
 # shellcheck source=/dev/null
 source "${SCRIPT_DIR}/lib/version.sh"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/lib/telemetry.sh"
 
 main() {
   setup_error_trap
@@ -43,6 +45,7 @@ main() {
   print_startup_banner "${installer_version}" "${DRY_RUN}"
   init_logging
   print_and_log 'INFO' 'NextGN installer started.'
+  telemetry_emit installer_started "domain=${DOMAIN}" "dry_run=${DRY_RUN}"
   acquire_install_lock "${DRY_RUN}"
   init_state "${FORCE}" "${DRY_RUN}"
 
@@ -75,6 +78,7 @@ main() {
   fi
 
   print_install_summary "${DOMAIN}" "${INSTALL_DIR}" "${ENABLE_TLS}" "${installer_version}"
+  telemetry_emit installer_completed "domain=${DOMAIN}" "tls=${ENABLE_TLS}"
   print_and_log 'SUCCESS' 'NextGN installer workflow completed.'
   release_install_lock
 }

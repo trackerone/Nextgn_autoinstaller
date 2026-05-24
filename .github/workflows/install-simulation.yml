@@ -1,0 +1,57 @@
+name: Install Simulation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  install-simulation:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install runtime tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck unzip nginx
+
+      - name: Run installer simulation suite
+        timeout-minutes: 12
+        run: bash tests/test_install_simulation.sh
+
+      - name: Build and verify release artifacts
+        timeout-minutes: 8
+        run: |
+          bash scripts/release.sh
+          bash scripts/verify-release.sh
+
+      - name: Validate extracted package self-tests
+        timeout-minutes: 5
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          WORK_DIR="$(mktemp -d)"
+          tar -xzf "dist/nextgn-installer-v${VERSION}.tar.gz" -C "${WORK_DIR}"
+          unzip -q "dist/nextgn-installer-v${VERSION}.zip" -d "${WORK_DIR}"
+          for pkg in "${WORK_DIR}/nextgn-installer-v${VERSION}"; do
+            (cd "${pkg}" && bash scripts/self-test.sh && bash scripts/verify-release.sh)
+          done
+
+      - name: Upload install simulation diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-simulation-${{ matrix.os }}
+          path: |
+            /tmp/nextgn-installer.log
+            /tmp/nextgn-support-*.tar.gz
+            /tmp/*/installer.log
+            /tmp/*/install/deploy/*.yml
+            /tmp/*/install/deploy/*.conf
+          if-no-files-found: ignore

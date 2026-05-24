@@ -22,6 +22,8 @@ required_paths=(
   "${PREFIX}/docs/"
   "${PREFIX}/README.md"
   "${PREFIX}/VERSION"
+  "${PREFIX}/scripts/"
+  "${PREFIX}/tests/"
 )
 [[ -f LICENSE ]] && required_paths+=("${PREFIX}/LICENSE")
 
