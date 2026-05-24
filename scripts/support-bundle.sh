@@ -15,7 +15,7 @@ trap cleanup EXIT
 
 redact_env() {
   local env_file="$1"
-  sed -E 's/(PASSWORD|SECRET|KEY|TOKEN|LICENSE)[^=]*=.*/\1=***REDACTED***/I' "${env_file}"
+  sed -E 's/^([[:space:]]*[A-Za-z0-9_\.-]*((PASSWORD|SECRET|KEY|TOKEN|LICENSE)|password)[A-Za-z0-9_\.-]*[[:space:]]*=).*/\1***REDACTED***/I' "${env_file}"
 }
 
 { docker compose ps || true; } >"${WORK_DIR}/docker-compose-ps.txt"

@@ -32,3 +32,21 @@ sudo ./installer/nextgn-install.sh --domain tracker.example.com --repo https://g
 ./installer/nextgn-install.sh --domain example.com --repo <repo-url> --install-docker
 NEXTGN_INSTALL_DOCKER=true ./installer/nextgn-install.sh --domain example.com --repo <repo-url>
 ```
+
+## Admin Bootstrap
+
+Interactive/manual mode:
+```bash
+./installer/nextgn-install.sh --domain example.com --repo <repo>
+```
+
+Unattended admin bootstrap:
+```bash
+NEXTGN_CREATE_ADMIN=true \
+NEXTGN_ADMIN_NAME="Site Owner" \
+NEXTGN_ADMIN_EMAIL="admin@example.com" \
+NEXTGN_ADMIN_PASSWORD_FILE="/root/nextgn-admin-password" \
+./installer/nextgn-install.sh --domain example.com --repo <repo> --install-docker
+```
+
+Use `chmod 600 /root/nextgn-admin-password` and avoid inline production passwords.

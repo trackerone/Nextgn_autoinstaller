@@ -23,9 +23,18 @@ docker_group_guidance() {
 print_install_summary() {
   local domain="$1" install_dir="$2" tls_enabled="$3" version="$4"
   local app_url="http://${domain}" docker_ver='unavailable' compose_ver='unavailable'
+  local admin_mode='disabled/manual'
 
   if [[ "${tls_enabled}" == 'true' ]]; then
     app_url="https://${domain}"
+  fi
+
+  if [[ "${CREATE_ADMIN:-false}" == 'true' ]]; then
+    if [[ "${DRY_RUN:-false}" == 'true' ]]; then
+      admin_mode='dry-run'
+    else
+      admin_mode='enabled'
+    fi
   fi
 
   if command -v docker >/dev/null 2>&1; then
@@ -44,7 +53,13 @@ print_install_summary() {
   printf '  Compose version: %s\n' "${compose_ver}"
   printf '  Log path: %s\n' "${LOG_FILE}"
   printf '  State path: %s\n' "${STATE_FILE}"
-  printf '  Next steps: %s\n' 'Review .env secrets, run admin bootstrap command, validate backups/monitoring.'
+  printf '  Admin bootstrap: %s\n' "${admin_mode}"
+  [[ -n "${ADMIN_EMAIL:-}" ]] && printf '  Admin email: %s\n' "${ADMIN_EMAIL}"
+  if [[ "${admin_mode}" == 'disabled/manual' ]]; then
+    printf '  Next steps: %s\n' "Review .env secrets, then run: cd '${install_dir}' && docker compose -f deploy/docker-compose.prod.yml exec app php artisan nextgn:sysop:create"
+  else
+    printf '  Next steps: %s\n' 'Review .env secrets, validate backups/monitoring.'
+  fi
 
   docker_group_guidance
 

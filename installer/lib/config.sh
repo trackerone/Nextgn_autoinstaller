@@ -14,6 +14,11 @@ REPO_BRANCH='main'
 LICENSE_KEY=''
 ENABLE_TLS="${NEXTGN_ENABLE_TLS:-false}"
 INSTALL_DOCKER="${NEXTGN_INSTALL_DOCKER:-false}"
+CREATE_ADMIN="${NEXTGN_CREATE_ADMIN:-false}"
+ADMIN_NAME="${NEXTGN_ADMIN_NAME:-}"
+ADMIN_EMAIL="${NEXTGN_ADMIN_EMAIL:-}"
+ADMIN_PASSWORD="${NEXTGN_ADMIN_PASSWORD:-}"
+ADMIN_PASSWORD_FILE="${NEXTGN_ADMIN_PASSWORD_FILE:-}"
 SHOW_VERSION='false'
 # shellcheck disable=SC2034
 UNATTENDED="${NEXTGN_UNATTENDED:-false}"
@@ -30,6 +35,11 @@ Options:
   --license-key <key>
   --enable-tls
   --install-docker
+  --create-admin
+  --admin-name <name>
+  --admin-email <email>
+  --admin-password <password>
+  --admin-password-file <path>
   --force
   --dry-run
   --version
@@ -40,6 +50,11 @@ Environment overrides:
   NEXTGN_INSTALL_DIR
   NEXTGN_ENABLE_TLS
   NEXTGN_INSTALL_DOCKER
+  NEXTGN_CREATE_ADMIN
+  NEXTGN_ADMIN_NAME
+  NEXTGN_ADMIN_EMAIL
+  NEXTGN_ADMIN_PASSWORD
+  NEXTGN_ADMIN_PASSWORD_FILE
   NEXTGN_UNATTENDED
 HELP
 }
@@ -82,6 +97,11 @@ parse_args() {
         INSTALL_DOCKER='true'
         shift
         ;;
+      --create-admin) CREATE_ADMIN='true'; shift ;;
+      --admin-name) require_value "$1" "${2:-}"; ADMIN_NAME="$2"; shift 2 ;;
+      --admin-email) require_value "$1" "${2:-}"; ADMIN_EMAIL="$2"; shift 2 ;;
+      --admin-password) require_value "$1" "${2:-}"; ADMIN_PASSWORD="$2"; shift 2 ;;
+      --admin-password-file) require_value "$1" "${2:-}"; ADMIN_PASSWORD_FILE="$2"; shift 2 ;;
       --force)
         # shellcheck disable=SC2034
         FORCE='true'
