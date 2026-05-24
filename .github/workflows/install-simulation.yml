@@ -45,13 +45,21 @@ jobs:
 
       - name: Upload install simulation diagnostics
         if: failure()
+        run: |
+          ARTIFACT_DIR="${GITHUB_WORKSPACE}/.simulation-artifacts"
+          mkdir -p "${ARTIFACT_DIR}"/{logs,configs,support,simulation}
+
+          cp -f /tmp/nextgn-installer.log "${ARTIFACT_DIR}/logs/" 2>/dev/null || true
+          cp -f /tmp/*/installer.log "${ARTIFACT_DIR}/logs/" 2>/dev/null || true
+          cp -f /tmp/*/install/deploy/*.yml "${ARTIFACT_DIR}/configs/" 2>/dev/null || true
+          cp -f /tmp/*/install/deploy/*.conf "${ARTIFACT_DIR}/configs/" 2>/dev/null || true
+          cp -f /tmp/nextgn-support-*.tar.gz "${ARTIFACT_DIR}/support/" 2>/dev/null || true
+          cp -f tests/logs/* "${ARTIFACT_DIR}/simulation/" 2>/dev/null || true
+
+      - name: Upload install simulation diagnostics
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: install-simulation-${{ matrix.os }}
-          path: |
-            /tmp/nextgn-installer.log
-            /tmp/nextgn-support-*.tar.gz
-            /tmp/*/installer.log
-            /tmp/*/install/deploy/*.yml
-            /tmp/*/install/deploy/*.conf
+          path: .simulation-artifacts/**
           if-no-files-found: ignore
