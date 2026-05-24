@@ -7,13 +7,14 @@ IFS=$'\n\t'
 # Shared installer configuration variables are consumed by other sourced modules.
 DRY_RUN='false'
 FORCE='false'
-DOMAIN=''
-INSTALL_DIR='/opt/nextgn-tracker'
+DOMAIN="${NEXTGN_DOMAIN:-}"
+INSTALL_DIR="${NEXTGN_INSTALL_DIR:-/opt/nextgn-tracker}"
 REPO_URL=''
 REPO_BRANCH='main'
 LICENSE_KEY=''
-ENABLE_TLS='false'
+ENABLE_TLS="${NEXTGN_ENABLE_TLS:-false}"
 SHOW_VERSION='false'
+UNATTENDED="${NEXTGN_UNATTENDED:-false}"
 
 show_help() {
   cat <<'HELP'
@@ -30,6 +31,12 @@ Options:
   --dry-run
   --version
   --help
+
+Environment overrides:
+  NEXTGN_DOMAIN
+  NEXTGN_INSTALL_DIR
+  NEXTGN_ENABLE_TLS
+  NEXTGN_UNATTENDED
 HELP
 }
 
@@ -86,7 +93,7 @@ parse_args() {
     return 0
   fi
 
-  [[ -n "${DOMAIN}" ]] || { print_error '--domain is required.'; exit 1; }
+  [[ -n "${DOMAIN}" ]] || { print_error '--domain is required (or set NEXTGN_DOMAIN).'; exit 1; }
   [[ -n "${REPO_URL}" ]] || { print_error '--repo is required.'; exit 1; }
 
   if [[ "${ENABLE_TLS}" == 'true' ]] && [[ ! "${DOMAIN}" =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
