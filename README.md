@@ -105,6 +105,21 @@ Security:
 - Set strict permissions: `chmod 600 /root/nextgn-admin-password`.
 
 
+
+## Release Readiness (Slice 10)
+
+Run the release readiness workflow before cutting `v0.1.0-beta` artifacts:
+
+```bash
+./scripts/release-readiness.sh
+```
+
+This runs:
+- repository self-test
+- shell test suite in `tests/*.sh`
+- deterministic release packaging (`scripts/release.sh`)
+- artifact integrity verification (`scripts/verify-release.sh`)
+
 ## Real VPS validation (Ubuntu 22.04/24.04)
 
 After running the installer on a real VPS, run:
