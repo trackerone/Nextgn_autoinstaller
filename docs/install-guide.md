@@ -50,3 +50,18 @@ NEXTGN_ADMIN_PASSWORD_FILE="/root/nextgn-admin-password" \
 ```
 
 Use `chmod 600 /root/nextgn-admin-password` and avoid inline production passwords.
+
+
+## Real VPS validation flow
+
+Example production-like install:
+
+```bash
+sudo ./installer/nextgn-install.sh   --domain tracker.example.com   --repo https://github.com/trackerone/nextgn_tracker.git   --install-docker   --enable-tls   --create-admin   --admin-name "Site Owner"   --admin-email admin@example.com   --admin-password-file /root/nextgn-admin-password
+```
+
+Then validate on the same VPS:
+
+```bash
+sudo ./scripts/validate-vps-install.sh   --domain tracker.example.com   --install-dir /opt/nextgn-tracker   --tls   --support-bundle
+```

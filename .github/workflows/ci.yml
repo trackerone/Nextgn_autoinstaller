@@ -17,14 +17,20 @@ jobs:
 
       - name: Bash syntax check
         run: |
-          bash -n installer/nextgn-install.sh installer/lib/*.sh tests/*.sh
+          bash -n installer/nextgn-install.sh installer/lib/*.sh tests/*.sh scripts/*.sh
 
       - name: ShellCheck
         run: |
-          shellcheck installer/nextgn-install.sh installer/lib/*.sh tests/*.sh
+          shellcheck installer/nextgn-install.sh installer/lib/*.sh tests/*.sh scripts/*.sh
 
       - name: Argument tests
         run: bash tests/test_args.sh
 
       - name: Installer behaviour tests
         run: bash tests/test_installer_behaviour.sh
+
+      - name: Install simulation tests
+        run: bash tests/test_install_simulation.sh
+
+      - name: Validate VPS tests
+        run: bash tests/test_validate_vps.sh
