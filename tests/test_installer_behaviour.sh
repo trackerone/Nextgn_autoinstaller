@@ -3,13 +3,17 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "${tmp_dir}"' EXIT
+
+LOG_FILE="${tmp_dir}/nextgn-installer.log"
+export LOG_FILE
+
 source "${ROOT_DIR}/installer/lib/output.sh"
 source "${ROOT_DIR}/installer/lib/logging.sh"
 source "${ROOT_DIR}/installer/lib/runner.sh"
 source "${ROOT_DIR}/installer/lib/templates.sh"
-
-tmp_dir="$(mktemp -d)"
-trap 'rm -rf "${tmp_dir}"' EXIT
 
 # template placeholder substitution
 mkdir -p "${tmp_dir}/project/installer/templates"
