@@ -28,10 +28,22 @@ source "${SCRIPT_DIR}/lib/verify.sh"
 source "${SCRIPT_DIR}/lib/admin.sh"
 # shellcheck source=installer/lib/summary.sh
 source "${SCRIPT_DIR}/lib/summary.sh"
+# shellcheck source=installer/lib/version.sh
+source "${SCRIPT_DIR}/lib/version.sh"
 
 main() {
   setup_error_trap
   parse_args "$@"
+
+  local installer_version
+  installer_version="$(get_installer_version "${REPO_ROOT}/VERSION")"
+
+  if [[ "${SHOW_VERSION}" == 'true' ]]; then
+    printf 'NextGN Installer v%s\n' "${installer_version}"
+    exit 0
+  fi
+
+  print_startup_banner "${installer_version}" "${DRY_RUN}"
 
   init_logging
   log_message 'INFO' 'NextGN installer started.'
@@ -67,7 +79,7 @@ main() {
     print_info 'DRY-RUN: templates and bootstrap would run.'
   fi
 
-  print_install_summary "${DOMAIN}" "${INSTALL_DIR}" "${ENABLE_TLS}"
+  print_install_summary "${DOMAIN}" "${INSTALL_DIR}" "${ENABLE_TLS}" "${installer_version}"
 
   print_success 'NextGN installer workflow completed.'
   log_message 'INFO' 'NextGN installer completed successfully.'

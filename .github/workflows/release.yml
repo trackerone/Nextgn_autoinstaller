@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          bash tests/test_args.sh
+          bash tests/test_installer_behaviour.sh
+
+      - name: Run shellcheck
+        run: shellcheck installer/nextgn-install.sh installer/lib/*.sh tests/*.sh scripts/*.sh
+
+      - name: Build release artifacts
+        run: |
+          bash scripts/release.sh
+          bash scripts/verify-release.sh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/nextgn-installer-*.tar.gz
+            dist/nextgn-installer-*.zip
+            dist/SHA256SUMS
+            dist/release-manifest.json
