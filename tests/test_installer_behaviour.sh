@@ -20,8 +20,8 @@ cp "${ROOT_DIR}/installer/templates/nginx.conf" "${tmp_dir}/project/installer/te
   cd "${tmp_dir}/project"
   write_templates "${tmp_dir}/project/output" "example.com" 'false'
 )
-rg -q 'APP_URL=https://example.com' "${tmp_dir}/project/output/.env"
-rg -q 'server_name example.com;' "${tmp_dir}/project/output/deploy/nginx.conf"
+grep -q 'APP_URL=https://example.com' "${tmp_dir}/project/output/.env"
+grep -q 'server_name example.com;' "${tmp_dir}/project/output/deploy/nginx.conf"
 
 # state resume behavior + force overwrite behavior
 STATE_DIR="${tmp_dir}/state"
@@ -30,9 +30,9 @@ init_state 'false' 'false'
 [[ -f "${STATE_FILE}" ]]
 echo 'step_one' >>"${STATE_FILE}"
 init_state 'false' 'false'
-rg -q '^step_one$' "${STATE_FILE}"
+grep -Eq '^step_one$' "${STATE_FILE}"
 init_state 'true' 'false'
-if rg -q '^step_one$' "${STATE_FILE}"; then
+if grep -Eq '^step_one$' "${STATE_FILE}"; then
   echo 'Expected force init_state to clear previous state.' >&2
   exit 1
 fi
