@@ -3,9 +3,9 @@
 set -Eeuo pipefail
 IFS=$'\n\t'
 
-STATE_DIR='/var/lib/nextgn-installer'
-STATE_FILE='/var/lib/nextgn-installer/state'
-LOCK_FILE='/var/lock/nextgn-installer.lock'
+: "${STATE_DIR:=/var/lib/nextgn-installer}"
+: "${STATE_FILE:=${STATE_DIR}/state}"
+: "${LOCK_FILE:=/var/lock/nextgn-installer.lock}"
 LOCK_FD=201
 CURRENT_PHASE='startup'
 : "${LOG_FILE:=/var/log/nextgn-installer.log}"
