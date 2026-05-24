@@ -17,3 +17,10 @@
 
 ## DNS
 - An A/AAAA record must point the domain to the target host before SSL/proxy setup.
+
+## Admin Bootstrap Inputs
+If enabling first-admin bootstrap, provide:
+- `NEXTGN_CREATE_ADMIN=true`
+- `NEXTGN_ADMIN_NAME`
+- `NEXTGN_ADMIN_EMAIL`
+- `NEXTGN_ADMIN_PASSWORD_FILE` (recommended) or `NEXTGN_ADMIN_PASSWORD`

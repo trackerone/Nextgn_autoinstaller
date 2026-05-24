@@ -85,3 +85,21 @@ Environment toggle:
 ```bash
 NEXTGN_INSTALL_DOCKER=true ./installer/nextgn-install.sh --domain example.com --repo <repo-url>
 ```
+
+## First Admin Bootstrap
+
+By default, installer does **not** create an admin automatically.
+
+Enable unattended first-sysop bootstrap:
+```bash
+NEXTGN_CREATE_ADMIN=true \
+NEXTGN_ADMIN_NAME="Site Owner" \
+NEXTGN_ADMIN_EMAIL="admin@example.com" \
+NEXTGN_ADMIN_PASSWORD_FILE="/root/nextgn-admin-password" \
+./installer/nextgn-install.sh --domain example.com --repo <repo> --install-docker
+```
+
+Security:
+- Prefer password file over inline password.
+- Avoid putting production passwords in shell history.
+- Set strict permissions: `chmod 600 /root/nextgn-admin-password`.

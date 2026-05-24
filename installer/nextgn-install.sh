@@ -74,9 +74,10 @@ main() {
     if [[ "${ENABLE_TLS}" == 'true' ]]; then run_step 'tls_setup' setup_tls "${INSTALL_DIR}" "${DOMAIN}" "${DRY_RUN}" "${FORCE}"; fi
     record_phase 'migrations'
     record_phase 'verification'; run_step 'verify_installation' verify_installation "${INSTALL_DIR}" "${DOMAIN}" "${ENABLE_TLS}" "${DRY_RUN}"
-    run_step 'admin_bootstrap_placeholder' bootstrap_admin_placeholder "${INSTALL_DIR}" "${DRY_RUN}"
+    run_step 'admin_bootstrap' bootstrap_admin "${INSTALL_DIR}" "${DRY_RUN}"
   else
     print_and_log 'INFO' 'DRY-RUN: templates and bootstrap would run.'
+    run_step 'admin_bootstrap' bootstrap_admin "${INSTALL_DIR}" "${DRY_RUN}"
   fi
 
   print_install_summary "${DOMAIN}" "${INSTALL_DIR}" "${ENABLE_TLS}" "${installer_version}"

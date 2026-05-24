@@ -39,3 +39,9 @@ For rollback planning:
 5. Remove installer-managed artifacts manually only after backup verification.
 
 > TODO: Add a guided rollback command once safety checks and backup validation are finalized.
+
+## Admin Bootstrap Issues
+- `Invalid admin email format`: set a valid `--admin-email` / `NEXTGN_ADMIN_EMAIL`.
+- `Admin password must be at least 12 characters`: use a stronger password.
+- `provide --admin-password-file or --admin-password`: supply credentials when `--create-admin` is enabled.
+- Prefer `--admin-password-file` in production; inline password is for CI/unattended automation only.
