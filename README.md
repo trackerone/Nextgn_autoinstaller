@@ -34,7 +34,7 @@ sudo ./installer/nextgn-install.sh \
 
 ## Command Options
 - `--domain <fqdn>`: Target domain for DNS and nginx template checks.
-- `--app-dir <path>`: Install directory for NextGN Tracker clone.
+- `--install-dir <path>`: Install directory for NextGN Tracker clone.
 - `--repo <git_url>`: Git repository URL for NextGN Tracker.
 - `--branch <name>`: Git branch to clone (default: `main`).
 - `--license-key <key>`: Optional license key string.
@@ -59,7 +59,7 @@ docs/
   server-requirements.md
   troubleshooting.md
 .github/workflows/
-  shellcheck.yml
+  ci.yml
 ```
 
 ## Security Notes
