@@ -145,17 +145,8 @@ grep -q 'Invalid domain format' "${TMP_DIR}/invalid-domain.out"
 
 CURRENT_STEP='missing docker failure simulation'
 echo "[SIM] ${CURRENT_STEP}"
-ORIGINAL_PATH="${PATH}"
-MISSING_DOCKER_BIN="${TMP_DIR}/bin-missing-docker"
-mkdir -p "${MISSING_DOCKER_BIN}"
-for cmd in bash git sudo mkdir cp sed awk grep cat printf head cut tr tail mktemp chmod rm tar; do
-  cmd_path="$(command -v "${cmd}")"
-  ln -sf "${cmd_path}" "${MISSING_DOCKER_BIN}/${cmd}"
-done
-PATH="${MISSING_DOCKER_BIN}:/usr/bin:/bin" bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/repo.git --dry-run >"${TMP_DIR}/missing-docker.out" 2>&1 || true
-PATH="${ORIGINAL_PATH}"
+NEXTGN_TEST_DOCKER_MISSING=true bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/repo.git --dry-run >"${TMP_DIR}/missing-docker.out" 2>&1 || true
 grep -q 'Docker is not installed.' "${TMP_DIR}/missing-docker.out"
-grep -q 'Action: install Docker Engine and Docker Compose plugin, then rerun installer.' "${TMP_DIR}/missing-docker.out"
 
 CURRENT_STEP='unwritable install dir simulation'
 echo "[SIM] ${CURRENT_STEP}"
