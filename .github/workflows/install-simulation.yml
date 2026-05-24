@@ -37,9 +37,15 @@ jobs:
         run: |
           VERSION="$(tr -d '[:space:]' < VERSION)"
           WORK_DIR="$(mktemp -d)"
-          tar -xzf "dist/nextgn-installer-v${VERSION}.tar.gz" -C "${WORK_DIR}"
-          unzip -q "dist/nextgn-installer-v${VERSION}.zip" -d "${WORK_DIR}"
-          for pkg in "${WORK_DIR}/nextgn-installer-v${VERSION}"; do
+          TAR_DIR="${WORK_DIR}/tar"
+          ZIP_DIR="${WORK_DIR}/zip"
+          mkdir -p "${TAR_DIR}" "${ZIP_DIR}"
+          tar -xzf "dist/nextgn-installer-v${VERSION}.tar.gz" -C "${TAR_DIR}"
+          unzip -q "dist/nextgn-installer-v${VERSION}.zip" -d "${ZIP_DIR}"
+          for pkg in \
+            "${TAR_DIR}/nextgn-installer-v${VERSION}" \
+            "${ZIP_DIR}/nextgn-installer-v${VERSION}"
+          do
             (cd "${pkg}" && bash scripts/self-test.sh && bash scripts/verify-release.sh)
           done
 
