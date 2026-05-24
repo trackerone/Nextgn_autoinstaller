@@ -5,6 +5,7 @@ Production-oriented Bash installer for deploying **NextGN Tracker** to a clean U
 ## Features
 - Modular installer architecture under `installer/lib`.
 - Preflight checks for OS, privileges, disk, RAM, Docker, Docker Compose, DNS/domain, and open ports.
+- Optional zero-to-production Docker provisioning via `--install-docker` or `NEXTGN_INSTALL_DOCKER=true`.
 - Safe logging to `/var/log/nextgn-installer.log`.
 - Human-readable terminal output with colorized status markers.
 - Dry-run mode (`--dry-run`) for safe planning.
@@ -66,3 +67,21 @@ docs/
 - No secrets are committed.
 - No license keys are hardcoded.
 - License validation is a placeholder module with a clean, replaceable interface.
+
+
+## Install Modes
+
+A) Preinstalled Docker mode:
+```bash
+./installer/nextgn-install.sh --domain example.com --repo <repo-url>
+```
+
+B) Zero-to-production mode:
+```bash
+./installer/nextgn-install.sh --domain example.com --repo <repo-url> --install-docker
+```
+
+Environment toggle:
+```bash
+NEXTGN_INSTALL_DOCKER=true ./installer/nextgn-install.sh --domain example.com --repo <repo-url>
+```

@@ -10,8 +10,8 @@
 - 10 GB free disk (more recommended for logs/backups)
 
 ## Required Software
-- Docker Engine
-- Docker Compose plugin (`docker compose`)
+- Docker Engine + Docker Compose plugin (`docker compose`) in preinstalled mode, or
+- Installer Docker provisioning enabled with `--install-docker` / `NEXTGN_INSTALL_DOCKER=true` (Ubuntu 22.04/24.04 only).
 - Git
 - Open ports: 80, 443
 
