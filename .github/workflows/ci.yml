@@ -9,15 +9,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Bash syntax check
-        run: |
-          bash -n installer/nextgn-install.sh
-          bash -n installer/lib/*.sh
-          bash -n tests/*.sh
-      - name: ShellCheck
+
+      - name: Install ShellCheck
         run: |
           sudo apt-get update
           sudo apt-get install -y shellcheck
+
+      - name: Bash syntax check
+        run: |
+          bash -n installer/nextgn-install.sh installer/lib/*.sh tests/*.sh
+
+      - name: ShellCheck
+        run: |
           shellcheck installer/nextgn-install.sh installer/lib/*.sh tests/*.sh
+
       - name: Argument tests
         run: bash tests/test_args.sh
+
+      - name: Installer behaviour tests
+        run: bash tests/test_installer_behaviour.sh
