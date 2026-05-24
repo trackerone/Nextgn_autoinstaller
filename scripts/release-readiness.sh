@@ -12,8 +12,15 @@ run_check() {
   "$@"
 }
 
+run_shell_tests() {
+  local test_file
+  for test_file in tests/*.sh; do
+    bash "${test_file}"
+  done
+}
+
 run_check 'Self test' ./scripts/self-test.sh
-run_check 'Shell tests' bash -c 'for test_file in tests/*.sh; do bash "${test_file}"; done'
+run_check 'Shell tests' run_shell_tests
 run_check 'Release build' ./scripts/release.sh
 run_check 'Release artifact verification' ./scripts/verify-release.sh
 
