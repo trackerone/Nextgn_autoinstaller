@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
-
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 cd "${REPO_ROOT}"
@@ -12,6 +8,8 @@ cd "${REPO_ROOT}"
 source "${SCRIPT_DIR}/lib/output.sh"
 # shellcheck source=installer/lib/logging.sh
 source "${SCRIPT_DIR}/lib/logging.sh"
+# shellcheck source=installer/lib/strict.sh
+source "${SCRIPT_DIR}/lib/strict.sh"
 # shellcheck source=installer/lib/runner.sh
 source "${SCRIPT_DIR}/lib/runner.sh"
 # shellcheck source=installer/lib/config.sh
@@ -24,40 +22,37 @@ source "${SCRIPT_DIR}/lib/license.sh"
 source "${SCRIPT_DIR}/lib/templates.sh"
 
 main() {
+  setup_error_trap
   parse_args "$@"
 
   init_logging
   log_message 'INFO' 'NextGN installer started.'
 
-  check_os_version
-  check_privileges
-  check_disk_ram
-  check_docker
-  check_domain_dns "${DOMAIN}"
-  check_ports
-  validate_license_key "${LICENSE_KEY}"
+  init_state "${FORCE}" "${DRY_RUN}"
 
-  run_cmd "${DRY_RUN}" mkdir -p "${APP_DIR}"
+  run_step 'os_check' check_os_version
+  run_step 'privilege_check' check_privileges
+  run_step 'resource_check' check_disk_ram
+  run_step 'docker_check' check_docker
+  run_step 'domain_check' check_domain_dns "${DOMAIN}"
+  run_step 'service_conflicts' check_existing_web_servers
+  run_step 'port_check' check_ports
+  run_step 'license_check' validate_license_key "${LICENSE_KEY}"
 
-  if [[ ! -d "${APP_DIR}/.git" ]]; then
-    run_cmd "${DRY_RUN}" git clone --branch "${REPO_BRANCH}" "${REPO_URL}" "${APP_DIR}"
+  run_step 'prepare_dir' run_cmd "${DRY_RUN}" mkdir -p "${INSTALL_DIR}"
+
+  if [[ ! -d "${INSTALL_DIR}/.git" ]]; then
+    run_step 'clone_repo' run_cmd "${DRY_RUN}" git clone --branch "${REPO_BRANCH}" "${REPO_URL}" "${INSTALL_DIR}"
   else
-    print_warn "Repository already exists at ${APP_DIR}, skipping clone."
+    print_warn "Repository already exists at ${INSTALL_DIR}, skipping clone."
   fi
 
   if [[ "${DRY_RUN}" == 'false' ]]; then
-    write_templates "${APP_DIR}" "${DOMAIN}" "${FORCE}"
+    run_step 'write_templates' write_templates "${INSTALL_DIR}" "${DOMAIN}" "${FORCE}"
+    run_step 'bootstrap_app' bootstrap_app "${INSTALL_DIR}" "${DOMAIN}" "${DRY_RUN}"
   else
-    print_info 'DRY-RUN: templates would be written.'
+    print_info 'DRY-RUN: templates and bootstrap would run.'
   fi
-
-  print_info 'Non-destructive app bootstrap commands (example sequence):'
-  print_info "- cd ${APP_DIR}"
-  print_info '- cp .env.example .env (if missing)'
-  print_info '- docker compose -f deploy/docker-compose.prod.yml run --rm app php artisan migrate --force'
-  print_info '- docker compose -f deploy/docker-compose.prod.yml run --rm app php artisan config:cache'
-  print_info '- docker compose -f deploy/docker-compose.prod.yml run --rm app php artisan route:cache'
-  print_info '- set filesystem permissions for storage/bootstrap/cache'
 
   print_success 'NextGN installer workflow completed.'
   log_message 'INFO' 'NextGN installer completed successfully.'
