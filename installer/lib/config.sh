@@ -77,7 +77,11 @@ parse_args() {
         shift 2
         ;;
       --enable-tls) ENABLE_TLS='true'; shift ;;
-      --install-docker) INSTALL_DOCKER='true'; shift ;;
+      --install-docker)
+        # shellcheck disable=SC2034
+        INSTALL_DOCKER='true'
+        shift
+        ;;
       --force)
         # shellcheck disable=SC2034
         FORCE='true'

@@ -45,7 +45,10 @@ install_docker_packages() {
   run_cmd "${DRY_RUN}" install -m 0755 -d /etc/apt/keyrings
   run_cmd "${DRY_RUN}" bash -lc 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
   run_cmd "${DRY_RUN}" chmod a+r /etc/apt/keyrings/docker.gpg
-  run_cmd "${DRY_RUN}" bash -lc 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo ${VERSION_CODENAME}) stable" > /etc/apt/sources.list.d/docker.list'
+  docker_arch="$(dpkg --print-architecture)"
+  # shellcheck source=/dev/null
+  ubuntu_codename="$(. /etc/os-release && printf '%s' "${VERSION_CODENAME}")"
+  run_cmd "${DRY_RUN}" bash -lc "echo 'deb [arch=${docker_arch} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${ubuntu_codename} stable' > /etc/apt/sources.list.d/docker.list"
   run_cmd "${DRY_RUN}" apt-get update
   run_cmd "${DRY_RUN}" apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 }
