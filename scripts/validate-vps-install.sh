@@ -69,7 +69,7 @@ run_check() {
   local name="$1"
   shift
   local status='fail' message='Unknown failure'
-  if output="$($@ 2>&1)"; then
+  if output="$("$@" 2>&1)"; then
     status='pass'
     message="${output:-OK}"
   else
@@ -184,10 +184,26 @@ if container_is_running app >/dev/null 2>&1; then add_check 'app container runni
 elif container_health_ok app; then add_check 'app container running/healthy' pass 'app healthy';
 else add_check 'app container running/healthy' fail 'app is not running/healthy'; fi
 
-container_is_running queue >/dev/null 2>&1 && add_check 'queue container running' pass 'queue running' || add_check 'queue container running' fail 'queue not running'
-container_is_running scheduler >/dev/null 2>&1 && add_check 'scheduler container running' pass 'scheduler running' || add_check 'scheduler container running' fail 'scheduler not running'
-container_health_ok db && add_check 'database container healthy' pass 'db healthy' || add_check 'database container healthy' warn 'db healthcheck missing or unhealthy'
-container_health_ok redis && add_check 'redis container healthy' pass 'redis healthy' || add_check 'redis container healthy' warn 'redis healthcheck missing or unhealthy'
+if container_is_running queue >/dev/null 2>&1; then
+  add_check 'queue container running' pass 'queue running'
+else
+  add_check 'queue container running' fail 'queue not running'
+fi
+if container_is_running scheduler >/dev/null 2>&1; then
+  add_check 'scheduler container running' pass 'scheduler running'
+else
+  add_check 'scheduler container running' fail 'scheduler not running'
+fi
+if container_health_ok db; then
+  add_check 'database container healthy' pass 'db healthy'
+else
+  add_check 'database container healthy' warn 'db healthcheck missing or unhealthy'
+fi
+if container_health_ok redis; then
+  add_check 'redis container healthy' pass 'redis healthy'
+else
+  add_check 'redis container healthy' warn 'redis healthcheck missing or unhealthy'
+fi
 
 run_check 'HTTP responds locally' check_http_local
 if bool_is_true "${ENABLE_TLS}"; then
