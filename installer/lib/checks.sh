@@ -46,6 +46,12 @@ check_disk_ram() {
 
 check_docker() {
   local docker_ver compose_ver
+  # Test-only hook for deterministic CI failure-path simulation.
+  if [[ "${NEXTGN_TEST_DOCKER_MISSING:-false}" == "true" ]]; then
+    print_error "Docker is not installed."
+    return 1
+  fi
+
   command -v docker >/dev/null 2>&1 || {
     print_error 'Docker is not installed.'
     print_warn 'Action: install Docker Engine and Docker Compose plugin, then rerun installer.'
