@@ -45,3 +45,16 @@ For rollback planning:
 - `Admin password must be at least 12 characters`: use a stronger password.
 - `provide --admin-password-file or --admin-password`: supply credentials when `--create-admin` is enabled.
 - Prefer `--admin-password-file` in production; inline password is for CI/unattended automation only.
+
+
+## Validation failures on real VPS
+
+Run:
+
+```bash
+sudo ./scripts/validate-vps-install.sh --domain <fqdn> --install-dir /opt/nextgn-tracker --tls
+```
+
+- Review `validation-report.txt` for recommended next action.
+- Inspect `validation-report.json` for automation/structured triage.
+- If final status is `FAIL`, run `scripts/support-bundle.sh <output-dir>` (or pass `--support-bundle`).

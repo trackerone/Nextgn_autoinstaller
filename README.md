@@ -103,3 +103,18 @@ Security:
 - Prefer password file over inline password.
 - Avoid putting production passwords in shell history.
 - Set strict permissions: `chmod 600 /root/nextgn-admin-password`.
+
+
+## Real VPS validation (Ubuntu 22.04/24.04)
+
+After running the installer on a real VPS, run:
+
+```bash
+sudo ./scripts/validate-vps-install.sh   --domain tracker.example.com   --install-dir /opt/nextgn-tracker   --tls   --support-bundle
+```
+
+Outputs:
+- `validation-report.json` (machine-readable)
+- `validation-report.txt` (human-readable)
+
+Exit code is `0` for pass/warn and `1` if any check fails.
