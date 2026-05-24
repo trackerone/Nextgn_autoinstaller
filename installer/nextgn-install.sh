@@ -20,6 +20,14 @@ source "${SCRIPT_DIR}/lib/checks.sh"
 source "${SCRIPT_DIR}/lib/license.sh"
 # shellcheck source=installer/lib/templates.sh
 source "${SCRIPT_DIR}/lib/templates.sh"
+# shellcheck source=installer/lib/tls.sh
+source "${SCRIPT_DIR}/lib/tls.sh"
+# shellcheck source=installer/lib/verify.sh
+source "${SCRIPT_DIR}/lib/verify.sh"
+# shellcheck source=installer/lib/admin.sh
+source "${SCRIPT_DIR}/lib/admin.sh"
+# shellcheck source=installer/lib/summary.sh
+source "${SCRIPT_DIR}/lib/summary.sh"
 
 main() {
   setup_error_trap
@@ -50,9 +58,16 @@ main() {
   if [[ "${DRY_RUN}" == 'false' ]]; then
     run_step 'write_templates' write_templates "${INSTALL_DIR}" "${DOMAIN}" "${FORCE}"
     run_step 'bootstrap_app' bootstrap_app "${INSTALL_DIR}" "${DOMAIN}" "${DRY_RUN}"
+    if [[ "${ENABLE_TLS}" == 'true' ]]; then
+      run_step 'tls_setup' setup_tls "${INSTALL_DIR}" "${DOMAIN}" "${DRY_RUN}" "${FORCE}"
+    fi
+    run_step 'verify_installation' verify_installation "${INSTALL_DIR}" "${DOMAIN}" "${ENABLE_TLS}" "${DRY_RUN}"
+    run_step 'admin_bootstrap_placeholder' bootstrap_admin_placeholder "${INSTALL_DIR}" "${DRY_RUN}"
   else
     print_info 'DRY-RUN: templates and bootstrap would run.'
   fi
+
+  print_install_summary "${DOMAIN}" "${INSTALL_DIR}" "${ENABLE_TLS}"
 
   print_success 'NextGN installer workflow completed.'
   log_message 'INFO' 'NextGN installer completed successfully.'

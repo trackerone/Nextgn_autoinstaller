@@ -10,6 +10,7 @@ INSTALL_DIR='/opt/nextgn-tracker'
 REPO_URL=''
 REPO_BRANCH='main'
 LICENSE_KEY=''
+ENABLE_TLS='false'
 
 show_help() {
   cat <<'HELP'
@@ -21,6 +22,7 @@ Options:
   --branch <branch>
   --install-dir <path>
   --license-key <key>
+  --enable-tls
   --force
   --dry-run
   --help
@@ -44,6 +46,7 @@ parse_args() {
       --repo) require_value "$1" "${2:-}"; REPO_URL="$2"; shift 2 ;;
       --branch) require_value "$1" "${2:-}"; REPO_BRANCH="$2"; shift 2 ;;
       --license-key) require_value "$1" "${2:-}"; LICENSE_KEY="$2"; shift 2 ;;
+      --enable-tls) ENABLE_TLS='true'; shift ;;
       --force) FORCE='true'; shift ;;
       --dry-run) DRY_RUN='true'; shift ;;
       --help) show_help; exit 0 ;;
@@ -53,4 +56,9 @@ parse_args() {
 
   [[ -n "${DOMAIN}" ]] || { print_error '--domain is required.'; exit 1; }
   [[ -n "${REPO_URL}" ]] || { print_error '--repo is required.'; exit 1; }
+
+  if [[ "${ENABLE_TLS}" == 'true' ]] && [[ ! "${DOMAIN}" =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+    print_error '--enable-tls requires a valid --domain value.'
+    exit 1
+  fi
 }
