@@ -14,6 +14,7 @@ REPO_BRANCH='main'
 LICENSE_KEY=''
 ENABLE_TLS="${NEXTGN_ENABLE_TLS:-false}"
 SHOW_VERSION='false'
+# shellcheck disable=SC2034
 UNATTENDED="${NEXTGN_UNATTENDED:-false}"
 
 show_help() {

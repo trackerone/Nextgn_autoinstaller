@@ -8,6 +8,7 @@ STATE_FILE='/var/lib/nextgn-installer/state'
 LOCK_FILE='/var/lock/nextgn-installer.lock'
 LOCK_FD=201
 CURRENT_PHASE='startup'
+: "${LOG_FILE:=/var/log/nextgn-installer.log}"
 
 run_cmd() {
   local dry_run="$1"
