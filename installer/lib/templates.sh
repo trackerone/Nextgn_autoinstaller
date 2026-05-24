@@ -15,6 +15,8 @@ write_templates() {
   copy_template "installer/templates/docker-compose.prod.yml" "${target_dir}/deploy/docker-compose.prod.yml" "${force}"
   copy_template "installer/templates/nginx.conf" "${target_dir}/deploy/nginx.conf" "${force}"
 
+  sed -i "s/__NEXTGN_DOMAIN__/${domain}/g" "${target_dir}/.env"
+  sed -i 's/DB_HOST=mysql/DB_HOST=database/g' "${target_dir}/.env"
   sed -i "s/__NEXTGN_DOMAIN__/${domain}/g" "${target_dir}/deploy/nginx.conf"
 }
 
