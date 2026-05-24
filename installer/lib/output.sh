@@ -18,18 +18,22 @@ else
   COLOR_RESET=''
 fi
 
+ts_prefix() {
+  date -u +'%Y-%m-%dT%H:%M:%SZ'
+}
+
 print_info() {
-  printf '%b[INFO]%b %s\n' "${COLOR_BLUE}" "${COLOR_RESET}" "$*"
+  printf '%s %b[INFO]%b %s\n' "$(ts_prefix)" "${COLOR_BLUE}" "${COLOR_RESET}" "$*"
 }
 
 print_warn() {
-  printf '%b[WARN]%b %s\n' "${COLOR_YELLOW}" "${COLOR_RESET}" "$*"
+  printf '%s %b[WARN]%b %s\n' "$(ts_prefix)" "${COLOR_YELLOW}" "${COLOR_RESET}" "$*"
 }
 
 print_error() {
-  printf '%b[ERROR]%b %s\n' "${COLOR_RED}" "${COLOR_RESET}" "$*" >&2
+  printf '%s %b[ERROR]%b %s\n' "$(ts_prefix)" "${COLOR_RED}" "${COLOR_RESET}" "$*" >&2
 }
 
 print_success() {
-  printf '%b[OK]%b %s\n' "${COLOR_GREEN}" "${COLOR_RESET}" "$*"
+  printf '%s %b[SUCCESS]%b %s\n' "$(ts_prefix)" "${COLOR_GREEN}" "${COLOR_RESET}" "$*"
 }

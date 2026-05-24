@@ -59,3 +59,19 @@ log_message() {
     fi
   fi
 }
+
+print_and_log() {
+  local level="$1"
+  shift
+  local message="$*"
+
+  case "${level}" in
+    INFO) print_info "${message}" ;;
+    WARN) print_warn "${message}" ;;
+    ERROR) print_error "${message}" ;;
+    SUCCESS) print_success "${message}" ;;
+    *) print_info "${message}" ;;
+  esac
+
+  log_message "${level}" "${message}"
+}
