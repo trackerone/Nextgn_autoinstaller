@@ -9,6 +9,7 @@ Production-oriented Bash installer for deploying **NextGN Tracker** to a clean U
 - Safe logging to `/var/log/nextgn-installer.log`.
 - Human-readable terminal output with colorized status markers.
 - Dry-run mode (`--dry-run`) for safe planning.
+- Founder pre-alpha local install mode (`--local` or `NEXTGN_LOCAL_INSTALL=true`) for laptop/LAN rehearsal without public DNS or TLS.
 - Non-destructive defaults (no force changes unless explicitly requested).
 - Template provisioning for `.env`, `docker-compose.prod.yml`, and `nginx.conf`.
 - Placeholder license validation interface for future activation flow.
@@ -24,6 +25,44 @@ sudo ./installer/nextgn-install.sh \
   --repo https://github.com/your-org/nextgn_tracker.git
 ```
 
+
+## Founder Pre-Alpha Local Install
+
+Use founder pre-alpha local install mode when you want to rehearse NextGN on a local Ubuntu Server laptop or LAN box before provisioning a real VPS. This mode is explicitly for founder-only local/LAN validation, not production hosting.
+
+Local mode accepts practical local targets such as `nextgn.local`, `nextgn.test`, `localhost`, or private LAN IP addresses like `192.168.1.50` and `10.0.0.25`. Public DNS validation is skipped in this mode, and TLS is not enabled; production/VPS installs should use a real FQDN and must not pass `--local`.
+
+Example dry run:
+
+```bash
+sudo ./installer/nextgn-install.sh \
+  --local \
+  --domain nextgn.local \
+  --app-dir /opt/nextgn-tracker \
+  --repo https://github.com/your-org/nextgn_tracker.git \
+  --dry-run
+```
+
+Example local rehearsal install:
+
+```bash
+sudo ./installer/nextgn-install.sh \
+  --local \
+  --domain 192.168.1.50 \
+  --app-dir /opt/nextgn-tracker \
+  --repo https://github.com/your-org/nextgn_tracker.git \
+  --install-docker
+```
+
+Environment equivalent:
+
+```bash
+NEXTGN_LOCAL_INSTALL=true sudo -E ./installer/nextgn-install.sh \
+  --domain nextgn.test \
+  --repo https://github.com/your-org/nextgn_tracker.git \
+  --dry-run
+```
+
 ## Dry Run Example
 ```bash
 sudo ./installer/nextgn-install.sh \
@@ -34,11 +73,12 @@ sudo ./installer/nextgn-install.sh \
 ```
 
 ## Command Options
-- `--domain <fqdn>`: Target domain for DNS and nginx template checks.
+- `--domain <fqdn>`: Target domain for DNS and nginx template checks. In `--local` mode this may be `localhost`, a `.local`/`.test` host, or a private LAN IP address.
 - `--install-dir <path>`: Install directory for NextGN Tracker clone.
 - `--repo <git_url>`: Git repository URL for NextGN Tracker.
 - `--branch <name>`: Git branch to clone (default: `main`).
 - `--license-key <key>`: Optional license key string.
+- `--local`: Enable founder pre-alpha laptop/LAN rehearsal mode. Public DNS validation and TLS are skipped; do not use for production/VPS installs.
 - `--force`: Allow controlled overwrite actions.
 - `--dry-run`: Print operations without changing the system.
 - `--help`: Show help output.

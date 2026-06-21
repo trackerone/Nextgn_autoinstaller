@@ -7,7 +7,7 @@ source "${ROOT_DIR}/installer/lib/output.sh"
 source "${ROOT_DIR}/installer/lib/config.sh"
 
 reset_defaults() {
-  DRY_RUN='false'; FORCE='false'; DOMAIN=''; INSTALL_DIR='/opt/nextgn-tracker'; REPO_URL=''; REPO_BRANCH='main'; LICENSE_KEY=''; ENABLE_TLS='false'; INSTALL_DOCKER='false'; CREATE_ADMIN='false'; ADMIN_NAME=''; ADMIN_EMAIL=''; ADMIN_PASSWORD=''; ADMIN_PASSWORD_FILE=''; SHOW_VERSION='false'
+  DRY_RUN='false'; FORCE='false'; DOMAIN=''; INSTALL_DIR='/opt/nextgn-tracker'; REPO_URL=''; REPO_BRANCH='main'; LICENSE_KEY=''; ENABLE_TLS='false'; INSTALL_DOCKER='false'; CREATE_ADMIN='false'; ADMIN_NAME=''; ADMIN_EMAIL=''; ADMIN_PASSWORD=''; ADMIN_PASSWORD_FILE=''; SHOW_VERSION='false'; LOCAL_INSTALL='false'
 }
 
 assert_eq() { [[ "$1" == "$2" ]] || { echo "assertion failed: expected '$2', got '$1'"; exit 1; }; }
@@ -24,6 +24,10 @@ assert_eq "$DRY_RUN" 'true'
 assert_eq "$FORCE" 'true'
 assert_eq "$INSTALL_DOCKER" 'true'
 
+run_parse --local --domain nextgn.local --repo git@example/repo.git
+assert_eq "$LOCAL_INSTALL" 'true'
+
+
 run_parse --domain example.com --repo git@example/repo.git --create-admin --admin-name 'Site Owner' --admin-email admin@example.com --admin-password 'very-secure-pass'
 assert_eq "$CREATE_ADMIN" 'true'
 assert_eq "$ADMIN_NAME" 'Site Owner'
@@ -36,6 +40,8 @@ assert_eq "$ADMIN_PASSWORD_FILE" '/tmp/admin-pass'
 reset_defaults
 help_output="$( (parse_args --help) 2>&1 || true )"
 [[ "$help_output" == *'Usage: nextgn-install.sh'* ]] || { echo 'help output missing usage'; exit 1; }
+[[ "$help_output" == *'--local'* ]] || { echo 'help output missing --local'; exit 1; }
+[[ "$help_output" == *'NEXTGN_LOCAL_INSTALL'* ]] || { echo 'help output missing NEXTGN_LOCAL_INSTALL'; exit 1; }
 
 echo 'Argument parsing tests passed.'
 

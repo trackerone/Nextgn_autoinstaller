@@ -13,6 +13,7 @@ REPO_URL=''
 REPO_BRANCH='main'
 LICENSE_KEY=''
 ENABLE_TLS="${NEXTGN_ENABLE_TLS:-false}"
+LOCAL_INSTALL="${NEXTGN_LOCAL_INSTALL:-false}"
 INSTALL_DOCKER="${NEXTGN_INSTALL_DOCKER:-false}"
 CREATE_ADMIN="${NEXTGN_CREATE_ADMIN:-false}"
 ADMIN_NAME="${NEXTGN_ADMIN_NAME:-}"
@@ -34,6 +35,7 @@ Options:
   --install-dir <path>
   --license-key <key>
   --enable-tls
+  --local
   --install-docker
   --create-admin
   --admin-name <name>
@@ -49,6 +51,7 @@ Environment overrides:
   NEXTGN_DOMAIN
   NEXTGN_INSTALL_DIR
   NEXTGN_ENABLE_TLS
+  NEXTGN_LOCAL_INSTALL
   NEXTGN_INSTALL_DOCKER
   NEXTGN_CREATE_ADMIN
   NEXTGN_ADMIN_NAME
@@ -57,6 +60,18 @@ Environment overrides:
   NEXTGN_ADMIN_PASSWORD_FILE
   NEXTGN_UNATTENDED
 HELP
+}
+
+is_local_install_host() {
+  local host="$1"
+
+  [[ "${host}" == 'localhost' ]] && return 0
+  [[ "${host}" =~ ^[A-Za-z0-9.-]+\.(local|test)$ ]] && return 0
+  [[ "${host}" =~ ^10\.([0-9]{1,3}\.){2}[0-9]{1,3}$ ]] && return 0
+  [[ "${host}" =~ ^192\.168\.[0-9]{1,3}\.[0-9]{1,3}$ ]] && return 0
+  [[ "${host}" =~ ^172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}$ ]] && return 0
+
+  return 1
 }
 
 require_value() {
@@ -92,6 +107,7 @@ parse_args() {
         shift 2
         ;;
       --enable-tls) ENABLE_TLS='true'; shift ;;
+      --local) LOCAL_INSTALL='true'; shift ;;
       --install-docker)
         # shellcheck disable=SC2034
         INSTALL_DOCKER='true'
@@ -149,7 +165,17 @@ parse_args() {
   [[ -n "${DOMAIN}" ]] || { print_error '--domain is required (or set NEXTGN_DOMAIN).'; exit 1; }
   [[ -n "${REPO_URL}" ]] || { print_error '--repo is required.'; exit 1; }
 
-  if [[ "${ENABLE_TLS}" == 'true' ]] && [[ ! "${DOMAIN}" =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+  if [[ "${LOCAL_INSTALL}" == 'true' && "${ENABLE_TLS}" == 'true' ]]; then
+    print_error '--local cannot be combined with --enable-tls. Local founder pre-alpha mode skips public DNS/TLS; use production mode on a VPS for TLS.'
+    exit 1
+  fi
+
+  if [[ "${LOCAL_INSTALL}" == 'true' ]]; then
+    if ! is_local_install_host "${DOMAIN}"; then
+      print_error "--local requires localhost, a LAN IP address, or a .local/.test host; got: ${DOMAIN}"
+      exit 1
+    fi
+  elif [[ "${ENABLE_TLS}" == 'true' ]] && [[ ! "${DOMAIN}" =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
     print_error '--enable-tls requires a valid --domain value.'
     exit 1
   fi

@@ -47,7 +47,10 @@ main() {
   print_startup_banner "${installer_version}" "${DRY_RUN}"
   init_logging
   print_and_log 'INFO' 'NextGN installer started.'
-  telemetry_emit installer_started "domain=${DOMAIN}" "dry_run=${DRY_RUN}"
+  if [[ "${LOCAL_INSTALL}" == 'true' ]]; then
+    print_and_log 'WARN' 'Founder pre-alpha local install mode enabled. This is not production mode.'
+  fi
+  telemetry_emit installer_started "domain=${DOMAIN}" "dry_run=${DRY_RUN}" "local_install=${LOCAL_INSTALL}"
   acquire_install_lock "${DRY_RUN}"
   init_state "${FORCE}" "${DRY_RUN}"
 
@@ -56,7 +59,11 @@ main() {
   run_step 'privilege_check' check_privileges
   run_step 'resource_check' check_disk_ram
   run_step 'docker_check' check_docker
-  run_step 'domain_check' check_domain_dns "${DOMAIN}"
+  if [[ "${LOCAL_INSTALL}" == 'true' ]]; then
+    print_and_log 'WARN' 'Local install mode enabled: public DNS validation skipped.'
+  else
+    run_step 'domain_check' check_domain_dns "${DOMAIN}"
+  fi
   run_step 'service_conflicts' check_existing_web_servers
   run_step 'port_check' check_ports
   run_step 'license_check' validate_license_key "${LICENSE_KEY}"
@@ -81,7 +88,7 @@ main() {
   fi
 
   print_install_summary "${DOMAIN}" "${INSTALL_DIR}" "${ENABLE_TLS}" "${installer_version}"
-  telemetry_emit installer_completed "domain=${DOMAIN}" "tls=${ENABLE_TLS}"
+  telemetry_emit installer_completed "domain=${DOMAIN}" "tls=${ENABLE_TLS}" "local_install=${LOCAL_INSTALL}"
   print_and_log 'SUCCESS' 'NextGN installer workflow completed.'
   release_install_lock
 }

@@ -18,6 +18,17 @@ NEXTGN_INSTALL_DOCKER=true
 
 Installer does not install Docker unless explicitly requested.
 
+
+## Founder Pre-Alpha Local Mode
+
+If you are rehearsing on a laptop or LAN server, use `--local` with `localhost`, a `.local`/`.test` host, or a private LAN IP address. Local mode intentionally prints `Local install mode enabled: public DNS validation skipped.` and does not run public DNS validation.
+
+Do not combine `--local` with `--enable-tls`; the installer rejects that combination because TLS belongs to the normal production/VPS domain flow. For production, remove `--local`, use a real FQDN, and make sure DNS points at the VPS before enabling TLS.
+
+```bash
+sudo ./installer/nextgn-install.sh --local --domain nextgn.local --repo <repo-url> --dry-run
+```
+
 ## Port Conflicts
 If ports 80/443 are busy, stop conflicting services or adjust reverse proxy architecture before deployment.
 
