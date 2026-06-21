@@ -19,6 +19,25 @@
    - cache warmup
    - permissions
 
+
+## Founder Pre-Alpha Local/LAN Rehearsal
+
+For founder-only pre-alpha rehearsal on a local Ubuntu Server laptop or LAN server, pass `--local` or set `NEXTGN_LOCAL_INSTALL=true`. This mode is not production mode: it permits local hosts such as `nextgn.local`, `nextgn.test`, `localhost`, and private LAN IP addresses, skips public DNS validation, and rejects TLS because local rehearsal does not use the public certificate flow.
+
+Dry-run example:
+
+```bash
+sudo ./installer/nextgn-install.sh --local --domain nextgn.local --repo https://github.com/your-org/nextgn_tracker.git --dry-run
+```
+
+Real local rehearsal example:
+
+```bash
+sudo ./installer/nextgn-install.sh --local --domain 192.168.1.50 --repo https://github.com/your-org/nextgn_tracker.git --install-docker
+```
+
+Do not use `--local` for production VPS installs. Production installs should keep the normal real-domain DNS flow and use `--enable-tls` only with a public FQDN that resolves correctly.
+
 ## Dry Run
 ```bash
 sudo ./installer/nextgn-install.sh --domain tracker.example.com --repo https://github.com/your-org/nextgn_tracker.git --dry-run
