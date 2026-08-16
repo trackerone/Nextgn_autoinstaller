@@ -68,10 +68,12 @@ services:
     image: mysql:8.4
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: nextgn
-      MYSQL_USER: nextgn
-      MYSQL_PASSWORD: change_me
-      MYSQL_ROOT_PASSWORD: change_me
+      MYSQL_DATABASE: '${DB_DATABASE:?DB_DATABASE must be set}'
+      MYSQL_USER: '${DB_USERNAME:?DB_USERNAME must be set}'
+      MYSQL_PASSWORD: '${DB_PASSWORD:?DB_PASSWORD must be set}'
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets:
+      - mysql_root_password
     volumes:
       - database-data:/var/lib/mysql
     healthcheck:
@@ -97,3 +99,7 @@ volumes:
   certbot-etc:
   certbot-var:
   certbot-www:
+
+secrets:
+  mysql_root_password:
+    file: ../.env.mysql-root

@@ -30,7 +30,9 @@ jobs:
           cp installer/templates/docker-compose.prod.yml "${validation_dir}/deploy/docker-compose.prod.yml"
           cp installer/templates/nginx.conf "${validation_dir}/deploy/nginx.conf"
           cp installer/templates/.env.example "${validation_dir}/.env"
-          docker compose -f "${validation_dir}/deploy/docker-compose.prod.yml" config --quiet
+          sed -i 's/^DB_PASSWORD=$/DB_PASSWORD=compose-validation-password/' "${validation_dir}/.env"
+          printf '%s\n' 'compose-validation-root-password' > "${validation_dir}/.env.mysql-root"
+          docker compose --env-file "${validation_dir}/.env" -f "${validation_dir}/deploy/docker-compose.prod.yml" config --quiet
 
       - name: Argument tests
         run: bash tests/test_args.sh

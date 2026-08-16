@@ -13,6 +13,7 @@
      --repo https://github.com/your-org/nextgn_tracker.git
    ```
 5. Review generated templates in target app directory.
+   The installer generates `APP_KEY`, the MySQL application password, and a separate `.env.mysql-root` secret before containers start. Existing non-placeholder secrets are preserved on resume. Back up both secret files securely; never commit them.
 6. The installer builds the production image from the selected NextGN Tracker branch and then executes the app bootstrap lifecycle inside the cloned repository:
    - environment setup
    - migrations

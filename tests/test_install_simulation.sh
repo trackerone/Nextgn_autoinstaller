@@ -147,6 +147,19 @@ grep -q 'Template written:' "${TMP_DIR}/realrun1.out"
 [[ -f "${NEXTGN_INSTALL_DIR}/deploy/docker-compose.prod.yml" ]]
 grep -q 'Install summary:' "${TMP_DIR}/realrun1.out"
 
+generated_app_key="$(sed -n 's/^APP_KEY=//p' "${NEXTGN_INSTALL_DIR}/.env")"
+generated_db_password="$(sed -n 's/^DB_PASSWORD=//p' "${NEXTGN_INSTALL_DIR}/.env")"
+generated_mysql_root_password="$(tr -d '\r\n' < "${NEXTGN_INSTALL_DIR}/.env.mysql-root")"
+[[ "${generated_app_key}" =~ ^base64:[A-Za-z0-9+/]{43}=$ ]]
+[[ "${generated_db_password}" =~ ^[a-f0-9]{64}$ ]]
+[[ "${generated_mysql_root_password}" =~ ^[a-f0-9]{64}$ ]]
+[[ "$(stat -c '%a' "${NEXTGN_INSTALL_DIR}/.env")" == '600' ]]
+[[ "$(stat -c '%a' "${NEXTGN_INSTALL_DIR}/.env.mysql-root")" == '600' ]]
+if grep -Fq "${generated_app_key}" "${TMP_DIR}/realrun1.out" "${LOG_FILE}" || grep -Fq "${generated_db_password}" "${TMP_DIR}/realrun1.out" "${LOG_FILE}" || grep -Fq "${generated_mysql_root_password}" "${TMP_DIR}/realrun1.out" "${LOG_FILE}"; then
+  echo 'Generated runtime secret leaked in installer logs.' >&2
+  exit 1
+fi
+
 # compose validation
 CURRENT_STEP='compose validation'
 echo "[SIM] ${CURRENT_STEP}"
@@ -172,6 +185,9 @@ echo "[SIM] ${CURRENT_STEP}"
 bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/repo.git >"${TMP_DIR}/realrun2.out" 2>&1
 grep -q 'Existing install state found; resume mode enabled.' "${TMP_DIR}/realrun2.out"
 grep -q 'Skipping completed step:' "${TMP_DIR}/realrun2.out"
+[[ "$(sed -n 's/^APP_KEY=//p' "${NEXTGN_INSTALL_DIR}/.env")" == "${generated_app_key}" ]]
+[[ "$(sed -n 's/^DB_PASSWORD=//p' "${NEXTGN_INSTALL_DIR}/.env")" == "${generated_db_password}" ]]
+[[ "$(tr -d '\r\n' < "${NEXTGN_INSTALL_DIR}/.env.mysql-root")" == "${generated_mysql_root_password}" ]]
 
 # failure simulations
 CURRENT_STEP='invalid domain failure simulation'
