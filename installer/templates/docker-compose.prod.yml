@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    volumes:
+      - app-storage:/app/storage
     healthcheck:
       test: ['CMD', 'php', '-v']
       interval: 30s
@@ -25,6 +27,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    volumes:
+      - app-storage:/app/storage
     command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
     depends_on:
       app:
@@ -37,6 +41,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    volumes:
+      - app-storage:/app/storage
     command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
     depends_on:
       app:
@@ -94,6 +100,7 @@ services:
       retries: 10
 
 volumes:
+  app-storage:
   database-data:
   redis-data:
   certbot-etc:

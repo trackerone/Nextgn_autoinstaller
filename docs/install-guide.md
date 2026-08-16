@@ -19,6 +19,7 @@
    - migrations
    - cache warmup
    - permissions
+7. Laravel's `storage` directory is kept in the shared `app-storage` named volume. The app, queue worker, and scheduler therefore use the same torrent, NFO, image, log, and framework files across container recreation.
 
 
 ## Founder Pre-Alpha Local/LAN Rehearsal
