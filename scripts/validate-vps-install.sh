@@ -109,7 +109,7 @@ check_docker_compose_version() { docker compose version; }
 check_docker_service_status() { systemctl is-active docker; }
 check_env_exists() { [[ -f "${INSTALL_DIR}/.env" ]] && echo '.env exists'; }
 check_compose_exists() { [[ -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" ]] && echo 'docker-compose.prod.yml exists'; }
-check_nginx_exists() { [[ -f "${INSTALL_DIR}/deploy/nginx.conf" ]] && echo 'nginx.conf exists'; }
+check_caddyfile_exists() { [[ -f "${INSTALL_DIR}/deploy/Caddyfile" ]] && echo 'Caddyfile exists'; }
 run_install_compose() { docker compose --env-file "${INSTALL_DIR}/.env" -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" "$@"; }
 check_compose_config() { run_install_compose config >/dev/null && echo 'compose config OK'; }
 check_containers_exist() { run_install_compose ps -a | awk 'NR>1{found=1} END{exit(found?0:1)}' && echo 'containers found'; }
@@ -127,8 +127,8 @@ container_health_ok() {
   [[ "${health}" == 'healthy' ]]
 }
 
-check_http_local() { curl -fsS -o /dev/null -m 5 http://127.0.0.1 && echo 'HTTP local reachable'; }
-check_https_local() { curl -kfsS -o /dev/null -m 5 https://127.0.0.1 && echo 'HTTPS local reachable'; }
+check_http_local() { curl -fsS -o /dev/null -m 5 --resolve "${DOMAIN}:80:127.0.0.1" "http://${DOMAIN}" && echo 'HTTP local reachable'; }
+check_https_local() { curl -fsS -o /dev/null -m 5 --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}" && echo 'HTTPS local reachable'; }
 check_artisan_about() { run_install_compose exec -T app php artisan about >/dev/null && echo 'artisan about OK'; }
 
 check_admin_bootstrap() {
@@ -178,7 +178,7 @@ run_check 'Docker Compose version' check_docker_compose_version
 run_check 'docker service status' check_docker_service_status
 run_check 'generated .env exists' check_env_exists
 run_check 'docker-compose.prod.yml exists' check_compose_exists
-run_check 'nginx.conf exists' check_nginx_exists
+run_check 'Caddyfile exists' check_caddyfile_exists
 run_check 'docker compose config passes' check_compose_config
 run_check 'containers exist' check_containers_exist
 

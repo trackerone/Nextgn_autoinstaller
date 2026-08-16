@@ -11,7 +11,8 @@ Production-oriented Bash installer for deploying **NextGN Tracker** to a clean U
 - Dry-run mode (`--dry-run`) for safe planning.
 - Founder pre-alpha local install mode (`--local` or `NEXTGN_LOCAL_INSTALL=true`) for laptop/LAN rehearsal without public DNS or TLS.
 - Non-destructive defaults (no force changes unless explicitly requested).
-- Template provisioning for `.env`, `docker-compose.prod.yml`, and `nginx.conf`.
+- Template provisioning for `.env`, `docker-compose.prod.yml`, and `Caddyfile`.
+- Automatic HTTPS certificate issuance and renewal through Caddy when `--enable-tls` is selected.
 - Placeholder license validation interface for future activation flow.
 
 ## Quick Start
@@ -73,7 +74,7 @@ sudo ./installer/nextgn-install.sh \
 ```
 
 ## Command Options
-- `--domain <fqdn>`: Target domain for DNS and nginx template checks. In `--local` mode this may be `localhost`, a `.local`/`.test` host, or a private LAN IP address.
+- `--domain <fqdn>`: Target domain for DNS and Caddy configuration. In `--local` mode this may be `localhost`, a `.local`/`.test` host, or a private LAN IP address.
 - `--install-dir <path>`: Install directory for NextGN Tracker clone.
 - `--repo <git_url>`: Git repository URL for NextGN Tracker.
 - `--branch <name>`: Git branch to clone (default: `main`).

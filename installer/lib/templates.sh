@@ -8,16 +8,25 @@ write_templates() {
   local target_dir="$1"
   local domain="$2"
   local force="$3"
+  local tls_enabled="$4"
+  local app_url="http://${domain}"
+  local site_address="http://${domain}"
+
+  if [[ "${tls_enabled}" == 'true' ]]; then
+    app_url="https://${domain}"
+    site_address="${domain}"
+  fi
 
   mkdir -p "${target_dir}/deploy"
 
   copy_env_template "installer/templates/.env.example" "${target_dir}/.env"
   copy_template "installer/templates/docker-compose.prod.yml" "${target_dir}/deploy/docker-compose.prod.yml" "${force}"
-  copy_template "installer/templates/nginx.conf" "${target_dir}/deploy/nginx.conf" "${force}"
+  copy_template "installer/templates/Caddyfile" "${target_dir}/deploy/Caddyfile" "${force}"
 
-  sed -i "s/__NEXTGN_DOMAIN__/${domain}/g" "${target_dir}/.env"
+  write_env_value "${target_dir}/.env" 'APP_URL' "${app_url}"
+  write_env_value "${target_dir}/.env" 'TRACKER_ANNOUNCE_URL' "${app_url}/announce/%s"
   sed -i 's/DB_HOST=mysql/DB_HOST=database/g' "${target_dir}/.env"
-  sed -i "s/__NEXTGN_DOMAIN__/${domain}/g" "${target_dir}/deploy/nginx.conf"
+  sed -i "s|__NEXTGN_SITE_ADDRESS__|${site_address}|g" "${target_dir}/deploy/Caddyfile"
 }
 
 copy_env_template() {

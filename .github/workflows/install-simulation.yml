@@ -20,7 +20,7 @@ jobs:
       - name: Install runtime tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y shellcheck unzip nginx
+          sudo apt-get install -y shellcheck unzip
 
       - name: Run installer simulation suite
         timeout-minutes: 12
@@ -61,6 +61,7 @@ jobs:
           cp -f /tmp/*/installer.log "${ARTIFACT_DIR}/logs/" 2>/dev/null || true
           cp -f /tmp/*/install/deploy/*.yml "${ARTIFACT_DIR}/configs/" 2>/dev/null || true
           cp -f /tmp/*/install/deploy/*.conf "${ARTIFACT_DIR}/configs/" 2>/dev/null || true
+          cp -f /tmp/*/install/deploy/Caddyfile "${ARTIFACT_DIR}/configs/" 2>/dev/null || true
           cp -f /tmp/nextgn-support-*.tar.gz "${ARTIFACT_DIR}/support/" 2>/dev/null || true
           cp -f tests/logs/* "${ARTIFACT_DIR}/simulation/" 2>/dev/null || true
 

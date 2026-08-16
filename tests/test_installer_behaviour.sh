@@ -19,14 +19,24 @@ source "${ROOT_DIR}/installer/lib/templates.sh"
 mkdir -p "${tmp_dir}/project/installer/templates"
 cp "${ROOT_DIR}/installer/templates/.env.example" "${tmp_dir}/project/installer/templates/.env.example"
 cp "${ROOT_DIR}/installer/templates/docker-compose.prod.yml" "${tmp_dir}/project/installer/templates/docker-compose.prod.yml"
-cp "${ROOT_DIR}/installer/templates/nginx.conf" "${tmp_dir}/project/installer/templates/nginx.conf"
+cp "${ROOT_DIR}/installer/templates/Caddyfile" "${tmp_dir}/project/installer/templates/Caddyfile"
 (
   cd "${tmp_dir}/project"
-  write_templates "${tmp_dir}/project/output" "example.com" 'false'
+  write_templates "${tmp_dir}/project/output" "example.com" 'false' 'false'
 )
 secret_output="$(prepare_runtime_secrets "${tmp_dir}/project/output")"
-grep -q 'APP_URL=https://example.com' "${tmp_dir}/project/output/.env"
-grep -q 'server_name example.com;' "${tmp_dir}/project/output/deploy/nginx.conf"
+grep -q 'APP_URL=http://example.com' "${tmp_dir}/project/output/.env"
+grep -q '^TRACKER_ANNOUNCE_URL=http://example.com/announce/%s$' "${tmp_dir}/project/output/.env"
+grep -q '^http://example.com {$' "${tmp_dir}/project/output/deploy/Caddyfile"
+grep -q '^  reverse_proxy app:10000$' "${tmp_dir}/project/output/deploy/Caddyfile"
+
+(
+  cd "${tmp_dir}/project"
+  write_templates "${tmp_dir}/project/output-tls" 'tracker.example.com' 'false' 'true'
+)
+grep -q 'APP_URL=https://tracker.example.com' "${tmp_dir}/project/output-tls/.env"
+grep -q '^TRACKER_ANNOUNCE_URL=https://tracker.example.com/announce/%s$' "${tmp_dir}/project/output-tls/.env"
+grep -q '^tracker.example.com {$' "${tmp_dir}/project/output-tls/deploy/Caddyfile"
 
 # runtime secrets are strong, restricted, non-leaking, and stable on resume
 env_file="${tmp_dir}/project/output/.env"
@@ -52,35 +62,44 @@ prepare_runtime_secrets "${tmp_dir}/project/output" >/dev/null
 [[ "$(read_env_value "${env_file}" 'DB_PASSWORD')" == "${db_password}" ]]
 [[ "$(tr -d '\r\n' < "${mysql_root_secret}")" == "${mysql_root_password}" ]]
 
+# Existing installs from before TRACKER_ANNOUNCE_URL was templated are upgraded.
+sed -i '/^TRACKER_ANNOUNCE_URL=/d' "${env_file}"
 (
   cd "${tmp_dir}/project"
-  write_templates "${tmp_dir}/project/output" 'forced.example.com' 'true' >/dev/null
+  write_templates "${tmp_dir}/project/output" 'forced.example.com' 'true' 'false' >/dev/null
 )
 prepare_runtime_secrets "${tmp_dir}/project/output" >/dev/null
+[[ "$(read_env_value "${env_file}" 'APP_URL')" == 'http://forced.example.com' ]]
+[[ "$(read_env_value "${env_file}" 'TRACKER_ANNOUNCE_URL')" == 'http://forced.example.com/announce/%s' ]]
+[[ "$(grep -c '^TRACKER_ANNOUNCE_URL=' "${env_file}")" -eq 1 ]]
 [[ "$(read_env_value "${env_file}" 'APP_KEY')" == "${app_key}" ]]
 [[ "$(read_env_value "${env_file}" 'DB_PASSWORD')" == "${db_password}" ]]
 [[ "$(tr -d '\r\n' < "${mysql_root_secret}")" == "${mysql_root_password}" ]]
 
 # production image and internal port contract
 compose_file="${tmp_dir}/project/output/deploy/docker-compose.prod.yml"
-nginx_file="${tmp_dir}/project/output/deploy/nginx.conf"
+caddy_file="${tmp_dir}/project/output/deploy/Caddyfile"
 [[ "$(grep -c '^    image: nextgn-tracker:local$' "${compose_file}")" -eq 3 ]]
 [[ "$(grep -c '^      - app-storage:/app/storage$' "${compose_file}")" -eq 3 ]]
 grep -q '^  app-storage:$' "${compose_file}"
 grep -q 'context: \.\.' "${compose_file}"
 grep -q 'dockerfile: Dockerfile' "${compose_file}"
-grep -q 'proxy_pass http://app:10000;' "${nginx_file}"
+grep -q '^  caddy:$' "${compose_file}"
+grep -q 'image: caddy:2-alpine' "${compose_file}"
+grep -q './Caddyfile:/etc/caddy/Caddyfile:ro' "${compose_file}"
+grep -q 'caddy-data:/data' "${compose_file}"
+grep -q 'caddy-config:/config' "${compose_file}"
 grep -Fq "MYSQL_DATABASE: '\${DB_DATABASE:?DB_DATABASE must be set}'" "${compose_file}"
 grep -Fq "MYSQL_USER: '\${DB_USERNAME:?DB_USERNAME must be set}'" "${compose_file}"
 grep -Fq "MYSQL_PASSWORD: '\${DB_PASSWORD:?DB_PASSWORD must be set}'" "${compose_file}"
 grep -q 'MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password' "${compose_file}"
 grep -q 'file: ../.env.mysql-root' "${compose_file}"
-if grep -q 'ghcr.io/your-org\|proxy_pass http://app:8000\|change_me' "${compose_file}" "${nginx_file}" "${env_file}"; then
+if grep -q 'ghcr.io/your-org\|nginx\|certbot\|change_me\|__NEXTGN_SITE_ADDRESS__' "${compose_file}" "${caddy_file}" "${env_file}"; then
   echo 'Generated deployment still contains a placeholder value or stale app port.' >&2
   exit 1
 fi
 
-bootstrap_output="$(bootstrap_app "${tmp_dir}/project/output" 'example.com' 'true')"
+bootstrap_output="$(bootstrap_app "${tmp_dir}/project/output" 'true')"
 grep -q 'docker compose -f deploy/docker-compose.prod.yml build --pull app' <<<"${bootstrap_output}"
 if grep -q 'docker compose -f deploy/docker-compose.prod.yml pull' <<<"${bootstrap_output}"; then
   echo 'Bootstrap must not pull the locally built application image.' >&2

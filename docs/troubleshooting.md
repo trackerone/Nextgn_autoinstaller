@@ -29,6 +29,18 @@ Do not combine `--local` with `--enable-tls`; the installer rejects that combina
 sudo ./installer/nextgn-install.sh --local --domain nextgn.local --repo <repo-url> --dry-run
 ```
 
+## TLS and certificate issues
+
+Caddy owns ports 80 and 443 and manages certificate issuance and renewal automatically. Before using `--enable-tls`, confirm that the domain's public A/AAAA records resolve to the server and that inbound TCP ports 80 and 443 are open.
+
+Check certificate and ACME activity with:
+
+```bash
+docker compose --env-file .env -f deploy/docker-compose.prod.yml logs caddy
+```
+
+Certificate state is stored in the `caddy-data` named volume. Do not delete that volume during ordinary updates or troubleshooting.
+
 ## Port Conflicts
 If ports 80/443 are busy, stop conflicting services or adjust reverse proxy architecture before deployment.
 

@@ -76,9 +76,9 @@ main() {
   fi
 
   if [[ "${DRY_RUN}" == 'false' ]]; then
-    record_phase 'templates'; run_step 'write_templates' write_templates "${INSTALL_DIR}" "${DOMAIN}" "${FORCE}"
+    record_phase 'templates'; run_step 'write_templates' write_templates "${INSTALL_DIR}" "${DOMAIN}" "${FORCE}" "${ENABLE_TLS}"
     prepare_runtime_secrets "${INSTALL_DIR}"
-    record_phase 'containers'; run_step 'bootstrap_app' bootstrap_app "${INSTALL_DIR}" "${DOMAIN}" "${DRY_RUN}"
+    record_phase 'containers'; run_step 'bootstrap_app' bootstrap_app "${INSTALL_DIR}" "${DRY_RUN}"
     if [[ "${ENABLE_TLS}" == 'true' ]]; then run_step 'tls_setup' setup_tls "${INSTALL_DIR}" "${DOMAIN}" "${DRY_RUN}" "${FORCE}"; fi
     record_phase 'migrations'
     record_phase 'verification'; run_step 'verify_installation' verify_installation "${INSTALL_DIR}" "${DOMAIN}" "${ENABLE_TLS}" "${DRY_RUN}"

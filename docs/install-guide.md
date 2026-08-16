@@ -40,6 +40,8 @@ sudo ./installer/nextgn-install.sh --local --domain 192.168.1.50 --repo https://
 
 Do not use `--local` for production VPS installs. Production installs should keep the normal real-domain DNS flow and use `--enable-tls` only with a public FQDN that resolves correctly.
 
+With `--enable-tls`, Caddy obtains and renews the public certificate automatically and redirects HTTP traffic to HTTPS. Without TLS, the generated Caddy site address and `APP_URL` remain explicitly HTTP.
+
 ## Dry Run
 ```bash
 sudo ./installer/nextgn-install.sh --domain tracker.example.com --repo https://github.com/your-org/nextgn_tracker.git --dry-run

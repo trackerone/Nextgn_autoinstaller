@@ -7,7 +7,7 @@ for cmd in "${required_cmds[@]}"; do
   command -v "${cmd}" >/dev/null || { echo "Missing command: ${cmd}"; exit 1; }
 done
 
-for f in installer/templates/.env.example installer/templates/docker-compose.prod.yml installer/templates/nginx.conf VERSION; do
+for f in installer/templates/.env.example installer/templates/docker-compose.prod.yml installer/templates/Caddyfile VERSION; do
   [[ -f "$f" ]] || { echo "Missing required file: $f"; exit 1; }
 done
 

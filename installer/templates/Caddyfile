@@ -1,0 +1,4 @@
+__NEXTGN_SITE_ADDRESS__ {
+  encode zstd gzip
+  reverse_proxy app:10000
+}

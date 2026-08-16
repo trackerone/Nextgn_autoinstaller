@@ -33,8 +33,8 @@ verify_installation() {
   verify_container_state "${install_dir}" queue
   verify_container_state "${install_dir}" scheduler
 
-  verify_http "http://127.0.0.1" 'HTTP'
-  if [[ "${tls_enabled}" == 'true' ]]; then verify_http "https://${domain}" 'HTTPS'; fi
+  verify_http "http://${domain}" 'HTTP' "${domain}:80:127.0.0.1"
+  if [[ "${tls_enabled}" == 'true' ]]; then verify_http "https://${domain}" 'HTTPS' "${domain}:443:127.0.0.1"; fi
 
   run_cmd "${dry_run}" bash -lc "cd '${install_dir}' && docker compose -f deploy/docker-compose.prod.yml exec -T app php artisan about >/dev/null"
 }
@@ -57,10 +57,10 @@ verify_container_state() {
   fi
 }
 
-is_http_up() { local url="$1"; curl -fsS --max-time 10 "${url}" >/dev/null; }
+is_http_up() { local url="$1" resolve="$2"; curl -fsS --max-time 10 --resolve "${resolve}" "${url}" >/dev/null; }
 verify_http() {
-  local url="$1" label="$2"
-  if retry_until_timeout "${label} check for ${url}" "${VERIFY_TIMEOUT_SECONDS}" "${VERIFY_RETRY_INTERVAL_SECONDS}" is_http_up "${url}"; then
+  local url="$1" label="$2" resolve="$3"
+  if retry_until_timeout "${label} check for ${url}" "${VERIFY_TIMEOUT_SECONDS}" "${VERIFY_RETRY_INTERVAL_SECONDS}" is_http_up "${url}" "${resolve}"; then
     print_success "Verification passed: ${label} response from ${url}."
   else
     VERIFY_WARNINGS+=("${label} check failed for ${url}.")
