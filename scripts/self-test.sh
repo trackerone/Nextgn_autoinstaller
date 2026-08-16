@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 IFS=$'\n\t'
 
-required_cmds=(bash docker git curl sed awk tar)
+required_cmds=(bash docker git curl openssl sed awk tar)
 for cmd in "${required_cmds[@]}"; do
   command -v "${cmd}" >/dev/null || { echo "Missing command: ${cmd}"; exit 1; }
 done

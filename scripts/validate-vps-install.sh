@@ -110,17 +110,18 @@ check_docker_service_status() { systemctl is-active docker; }
 check_env_exists() { [[ -f "${INSTALL_DIR}/.env" ]] && echo '.env exists'; }
 check_compose_exists() { [[ -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" ]] && echo 'docker-compose.prod.yml exists'; }
 check_nginx_exists() { [[ -f "${INSTALL_DIR}/deploy/nginx.conf" ]] && echo 'nginx.conf exists'; }
-check_compose_config() { docker compose -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" config >/dev/null && echo 'compose config OK'; }
-check_containers_exist() { docker compose -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" ps -a | awk 'NR>1{found=1} END{exit(found?0:1)}' && echo 'containers found'; }
+run_install_compose() { docker compose --env-file "${INSTALL_DIR}/.env" -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" "$@"; }
+check_compose_config() { run_install_compose config >/dev/null && echo 'compose config OK'; }
+check_containers_exist() { run_install_compose ps -a | awk 'NR>1{found=1} END{exit(found?0:1)}' && echo 'containers found'; }
 
 container_is_running() {
   local service="$1"
-  docker compose -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" ps --status running "${service}" | awk 'NR>1 {found=1} END{exit(found?0:1)}'
+  run_install_compose ps --status running "${service}" | awk 'NR>1 {found=1} END{exit(found?0:1)}'
 }
 
 container_health_ok() {
   local service="$1" cid
-  cid="$(docker compose -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" ps -q "${service}")"
+  cid="$(run_install_compose ps -q "${service}")"
   [[ -n "${cid}" ]] || return 1
   health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${cid}" 2>/dev/null || true)"
   [[ "${health}" == 'healthy' ]]
@@ -128,7 +129,7 @@ container_health_ok() {
 
 check_http_local() { curl -fsS -o /dev/null -m 5 http://127.0.0.1 && echo 'HTTP local reachable'; }
 check_https_local() { curl -kfsS -o /dev/null -m 5 https://127.0.0.1 && echo 'HTTPS local reachable'; }
-check_artisan_about() { docker compose -f "${INSTALL_DIR}/deploy/docker-compose.prod.yml" exec -T app php artisan about >/dev/null && echo 'artisan about OK'; }
+check_artisan_about() { run_install_compose exec -T app php artisan about >/dev/null && echo 'artisan about OK'; }
 
 check_admin_bootstrap() {
   if grep -Eq '^NEXTGN_ADMIN_BOOTSTRAPPED=true$' "${INSTALL_DIR}/.env" 2>/dev/null; then

@@ -52,12 +52,16 @@ cat > "${TMP_DIR}/bin/docker" <<'DOCKER'
 #!/usr/bin/env bash
 if [[ "$1" == "--version" ]]; then echo 'Docker version 25.0.0'; exit 0; fi
 if [[ "$1" == "compose" && "$2" == "version" ]]; then echo 'Docker Compose version v2.30.0'; exit 0; fi
-if [[ "$1" == "compose" && "$2" == "-f" && "$4" == "config" ]]; then exit 0; fi
-if [[ "$1" == "compose" && "$2" == "-f" && "$4" == "ps" && "${5:-}" == "-a" ]]; then echo 'NAME'; echo 'nextgn-app'; exit 0; fi
-if [[ "$1" == "compose" && "$2" == "-f" && "$4" == "ps" && "$5" == "--status" ]]; then echo 'NAME'; [[ "$7" == "app" || "$7" == "queue" || "$7" == "scheduler" ]] && echo "nextgn-$7"; exit 0; fi
-if [[ "$1" == "compose" && "$2" == "-f" && "$4" == "ps" && "$5" == "-q" ]]; then echo "cid-$6"; exit 0; fi
+if [[ "$1" == "compose" ]]; then
+  shift
+  while [[ "$1" == "--env-file" || "$1" == "-f" ]]; do shift 2; done
+  if [[ "$1" == "config" ]]; then exit 0; fi
+  if [[ "$1" == "ps" && "${2:-}" == "-a" ]]; then echo 'NAME'; echo 'nextgn-app'; exit 0; fi
+  if [[ "$1" == "ps" && "${2:-}" == "--status" ]]; then echo 'NAME'; [[ "$4" == "app" || "$4" == "queue" || "$4" == "scheduler" ]] && echo "nextgn-$4"; exit 0; fi
+  if [[ "$1" == "ps" && "${2:-}" == "-q" ]]; then echo "cid-$3"; exit 0; fi
+  if [[ "$1" == "exec" ]]; then exit 0; fi
+fi
 if [[ "$1" == "inspect" ]]; then echo 'healthy'; exit 0; fi
-if [[ "$1" == "compose" && "$2" == "-f" && "$4" == "exec" ]]; then exit 0; fi
 exit 0
 DOCKER
 cat > "${TMP_DIR}/bin/systemctl" <<'SYSTEMCTL'
