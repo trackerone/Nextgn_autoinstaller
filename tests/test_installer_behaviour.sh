@@ -65,6 +65,8 @@ prepare_runtime_secrets "${tmp_dir}/project/output" >/dev/null
 compose_file="${tmp_dir}/project/output/deploy/docker-compose.prod.yml"
 nginx_file="${tmp_dir}/project/output/deploy/nginx.conf"
 [[ "$(grep -c '^    image: nextgn-tracker:local$' "${compose_file}")" -eq 3 ]]
+[[ "$(grep -c '^      - app-storage:/app/storage$' "${compose_file}")" -eq 3 ]]
+grep -q '^  app-storage:$' "${compose_file}"
 grep -q 'context: \.\.' "${compose_file}"
 grep -q 'dockerfile: Dockerfile' "${compose_file}"
 grep -q 'proxy_pass http://app:10000;' "${nginx_file}"

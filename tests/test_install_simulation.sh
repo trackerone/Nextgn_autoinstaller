@@ -146,6 +146,8 @@ bash "${ROOT_DIR}/installer/nextgn-install.sh" --repo https://example.invalid/re
 grep -q 'Template written:' "${TMP_DIR}/realrun1.out"
 [[ -f "${NEXTGN_INSTALL_DIR}/deploy/docker-compose.prod.yml" ]]
 grep -q 'Install summary:' "${TMP_DIR}/realrun1.out"
+[[ "$(grep -c '^      - app-storage:/app/storage$' "${NEXTGN_INSTALL_DIR}/deploy/docker-compose.prod.yml")" -eq 3 ]]
+grep -q '^  app-storage:$' "${NEXTGN_INSTALL_DIR}/deploy/docker-compose.prod.yml"
 
 generated_app_key="$(sed -n 's/^APP_KEY=//p' "${NEXTGN_INSTALL_DIR}/.env")"
 generated_db_password="$(sed -n 's/^DB_PASSWORD=//p' "${NEXTGN_INSTALL_DIR}/.env")"
