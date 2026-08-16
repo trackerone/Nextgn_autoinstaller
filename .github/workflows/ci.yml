@@ -28,11 +28,21 @@ jobs:
           validation_dir="$(mktemp -d)"
           mkdir -p "${validation_dir}/deploy"
           cp installer/templates/docker-compose.prod.yml "${validation_dir}/deploy/docker-compose.prod.yml"
-          cp installer/templates/nginx.conf "${validation_dir}/deploy/nginx.conf"
+          sed 's|__NEXTGN_SITE_ADDRESS__|http://example.test|' installer/templates/Caddyfile > "${validation_dir}/deploy/Caddyfile"
           cp installer/templates/.env.example "${validation_dir}/.env"
           sed -i 's/^DB_PASSWORD=$/DB_PASSWORD=compose-validation-password/' "${validation_dir}/.env"
           printf '%s\n' 'compose-validation-root-password' > "${validation_dir}/.env.mysql-root"
           docker compose --env-file "${validation_dir}/.env" -f "${validation_dir}/deploy/docker-compose.prod.yml" config --quiet
+
+      - name: Validate HTTP and HTTPS Caddy templates
+        run: |
+          validation_dir="$(mktemp -d)"
+          for site_address in 'http://example.test' 'tracker.example.com'; do
+            sed "s|__NEXTGN_SITE_ADDRESS__|${site_address}|" installer/templates/Caddyfile > "${validation_dir}/Caddyfile"
+            docker run --rm \
+              -v "${validation_dir}/Caddyfile:/etc/caddy/Caddyfile:ro" \
+              caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+          done
 
       - name: Argument tests
         run: bash tests/test_args.sh

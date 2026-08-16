@@ -44,9 +44,11 @@ ENV
 cat > "${TMP_DIR}/install/deploy/docker-compose.prod.yml" <<'YAML'
 services: {}
 YAML
-cat > "${TMP_DIR}/install/deploy/nginx.conf" <<'NGINX'
-server {}
-NGINX
+cat > "${TMP_DIR}/install/deploy/Caddyfile" <<'CADDY'
+http://tracker.example.com {
+  reverse_proxy app:10000
+}
+CADDY
 
 cat > "${TMP_DIR}/bin/docker" <<'DOCKER'
 #!/usr/bin/env bash

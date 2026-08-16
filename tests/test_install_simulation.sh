@@ -24,9 +24,9 @@ on_error() {
     done
   fi
 
-  if [[ -f "${NEXTGN_INSTALL_DIR:-}/deploy/nginx.conf" ]]; then
-    echo "--- deploy/nginx.conf (head) ---" >&2
-    sed -n '1,80p' "${NEXTGN_INSTALL_DIR}/deploy/nginx.conf" >&2 || true
+  if [[ -f "${NEXTGN_INSTALL_DIR:-}/deploy/Caddyfile" ]]; then
+    echo "--- deploy/Caddyfile (head) ---" >&2
+    sed -n '1,80p' "${NEXTGN_INSTALL_DIR}/deploy/Caddyfile" >&2 || true
   fi
 
   if [[ -f "${NEXTGN_INSTALL_DIR:-}/deploy/docker-compose.prod.yml" ]]; then
@@ -63,7 +63,7 @@ if [[ "$1" == "clone" ]]; then
   mkdir -p "${target}/installer/templates" "${target}/deploy" "${target}/storage" "${target}/bootstrap/cache"
   cp installer/templates/.env.example "${target}/installer/templates/.env.example"
   cp installer/templates/docker-compose.prod.yml "${target}/installer/templates/docker-compose.prod.yml"
-  cp installer/templates/nginx.conf "${target}/installer/templates/nginx.conf"
+  cp installer/templates/Caddyfile "${target}/installer/templates/Caddyfile"
   cp installer/templates/.env.example "${target}/.env.example"
   exit 0
 fi
@@ -169,15 +169,15 @@ if command -v docker >/dev/null 2>&1; then
   docker compose -f "${NEXTGN_INSTALL_DIR}/deploy/docker-compose.prod.yml" config >/dev/null
 fi
 
-# nginx validation: placeholders replaced and domain present
-CURRENT_STEP='nginx validation'
+# Caddy validation: HTTP mode is explicit and placeholders are replaced
+CURRENT_STEP='Caddy validation'
 echo "[SIM] ${CURRENT_STEP}"
-grep -q 'example.test' "${NEXTGN_INSTALL_DIR}/deploy/nginx.conf"
-if command -v nginx >/dev/null 2>&1; then
-  nginx -t -c "${NEXTGN_INSTALL_DIR}/deploy/nginx.conf" -p "${NEXTGN_INSTALL_DIR}" >/dev/null 2>&1 || true
-fi
-if grep -q '__NEXTGN_DOMAIN__' "${NEXTGN_INSTALL_DIR}/deploy/nginx.conf"; then
-  echo "nginx placeholder not replaced" >&2
+grep -q '^http://example.test {$' "${NEXTGN_INSTALL_DIR}/deploy/Caddyfile"
+grep -q '^  reverse_proxy app:10000$' "${NEXTGN_INSTALL_DIR}/deploy/Caddyfile"
+grep -q '^APP_URL=http://example.test$' "${NEXTGN_INSTALL_DIR}/.env"
+grep -q '^TRACKER_ANNOUNCE_URL=http://example.test/announce/%s$' "${NEXTGN_INSTALL_DIR}/.env"
+if grep -q '__NEXTGN_SITE_ADDRESS__' "${NEXTGN_INSTALL_DIR}/deploy/Caddyfile"; then
+  echo "Caddy placeholder not replaced" >&2
   exit 1
 fi
 

@@ -112,17 +112,7 @@ run_step() {
 }
 
 bootstrap_app() {
-  local install_dir="$1" domain="$2" dry_run="$3"
-  local env_file="${install_dir}/.env"
-  local env_template="${install_dir}/.env.example"
-
-  if [[ ! -f "${env_file}" && -f "${env_template}" ]]; then
-    run_cmd "${dry_run}" cp "${env_template}" "${env_file}"
-  fi
-
-  if [[ -f "${env_file}" ]]; then
-    run_cmd "${dry_run}" sed -i "s|APP_URL=.*|APP_URL=https://${domain}|" "${env_file}"
-  fi
+  local install_dir="$1" dry_run="$2"
 
   run_cmd "${dry_run}" bash -lc "cd '${install_dir}' && docker compose -f deploy/docker-compose.prod.yml build --pull app"
   run_cmd "${dry_run}" bash -lc "cd '${install_dir}' && docker compose -f deploy/docker-compose.prod.yml up -d"
