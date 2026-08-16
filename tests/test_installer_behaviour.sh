@@ -27,6 +27,25 @@ cp "${ROOT_DIR}/installer/templates/nginx.conf" "${tmp_dir}/project/installer/te
 grep -q 'APP_URL=https://example.com' "${tmp_dir}/project/output/.env"
 grep -q 'server_name example.com;' "${tmp_dir}/project/output/deploy/nginx.conf"
 
+# production image and internal port contract
+compose_file="${tmp_dir}/project/output/deploy/docker-compose.prod.yml"
+nginx_file="${tmp_dir}/project/output/deploy/nginx.conf"
+[[ "$(grep -c '^    image: nextgn-tracker:local$' "${compose_file}")" -eq 3 ]]
+grep -q 'context: \.\.' "${compose_file}"
+grep -q 'dockerfile: Dockerfile' "${compose_file}"
+grep -q 'proxy_pass http://app:10000;' "${nginx_file}"
+if grep -q 'ghcr.io/your-org\|proxy_pass http://app:8000' "${compose_file}" "${nginx_file}"; then
+  echo 'Generated deployment still contains a placeholder image or stale app port.' >&2
+  exit 1
+fi
+
+bootstrap_output="$(bootstrap_app "${tmp_dir}/project/output" 'example.com' 'true')"
+grep -q 'docker compose -f deploy/docker-compose.prod.yml build --pull app' <<<"${bootstrap_output}"
+if grep -q 'docker compose -f deploy/docker-compose.prod.yml pull' <<<"${bootstrap_output}"; then
+  echo 'Bootstrap must not pull the locally built application image.' >&2
+  exit 1
+fi
+
 # state resume behavior + force overwrite behavior
 STATE_DIR="${tmp_dir}/state"
 STATE_FILE="${tmp_dir}/state/state"

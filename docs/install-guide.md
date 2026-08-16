@@ -13,7 +13,7 @@
      --repo https://github.com/your-org/nextgn_tracker.git
    ```
 5. Review generated templates in target app directory.
-6. Execute app bootstrap lifecycle inside cloned NextGN Tracker repo:
+6. The installer builds the production image from the selected NextGN Tracker branch and then executes the app bootstrap lifecycle inside the cloned repository:
    - environment setup
    - migrations
    - cache warmup
